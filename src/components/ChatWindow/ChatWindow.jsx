@@ -4,6 +4,8 @@ import MessageInput from './MessageInput/MessageInput';
 import './ChatWindow.css'
 
 export default function ChatWindow() {
+  
+
   return (
     <div className="chat-window flex flex-col h-full">
       {/* Список сообщений */}
