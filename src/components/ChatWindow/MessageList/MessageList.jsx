@@ -8,23 +8,6 @@ export default function MessageList() {
     { id: 1, text: 'Мне нужно заполнить статистическую форму', isUser: true },
     { id: 2, text: 'Хорошо, давайте уточним. Какую форму вы хотите заполнить?', isUser: false },
     { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
 
     { id: 4, text: 'Понял вас! Если вам понадобится помощь, просто напишите. Хорошего дня!', isUser: false },
     { id: 5, text: 'Оцените качество ответа', isUser: false, isFeedback: true },
