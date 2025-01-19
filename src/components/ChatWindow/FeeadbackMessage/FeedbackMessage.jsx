@@ -13,7 +13,7 @@ export default function FeedbackMessage({ text }) {
   return (
     <div className="feedback-message message mb-8 bg-white flex font-light flex-col items-start">
       <p className="text-black mb-6">{text}</p>
-      <div className="flex gap-6">
+      <div className="flex gap-6 feedback-message__btns">
         <button
           className="feedback-button flex gap-5 font-light"
           onClick={() => openModal('good')} // Открыть модалку "Хорошо"
