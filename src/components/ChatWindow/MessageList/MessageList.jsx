@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Message from '../Message/Message';
 import FeedbackMessage from '../FeeadbackMessage/FeedbackMessage';
 import Header from '../../Header/Header';
@@ -30,18 +30,27 @@ export default function MessageList() {
     { id: 5, text: 'Оцените качество ответа', isUser: false, isFeedback: true },
   ];
 
+  const scrollTargetRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollTargetRef.current) {
+      scrollTargetRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return (
-   <>
-   <Header></Header>
-    <div className="message-list flex flex-col max-h-[732px] overflow-y-auto">
-{messages.map((message) =>
-        message.isFeedback ? (
-          <FeedbackMessage key={message.id} text={message.text} />
-        ) : (
-          <Message key={message.id} text={message.text} isUser={message.isUser} />
-        )
-      )}
-    </div>
+    <>
+      <Header></Header>
+      <div className="message-list flex flex-col max-h-[732px] overflow-y-auto">
+        {messages.map((message) =>
+          message.isFeedback ? (
+            <FeedbackMessage key={message.id} text={message.text} />
+          ) : (
+            <Message key={message.id} text={message.text} isUser={message.isUser} />
+          )
+        )}
+        <div ref={scrollTargetRef}></div>
+      </div>
     </>
   );
 }
