@@ -1,0 +1,37 @@
+.close {
+   position: absolute;
+   top: 30px;
+   right: 30px;
+}
+
+.fixed {
+   background: rgba(0, 0, 0, 0.5); }
+
+ 
+ /* Textarea */
+ textarea {
+   border-radius: 10px;
+border: 1px solid #0B427B;
+background:#EEE;
+   resize: none;
+   font-size: 16px;
+   color: #878787;  
+   padding: 16px;
+
+   box-sizing: border-box;
+ }
+ 
+ textarea:focus {
+   outline: none;
+   border-color: #2563eb;
+   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+ }
+
+ .feedback__button {
+   padding: 13.5px 92px;
+   border-radius: 10px;
+ }
+
+ .modal {
+   border-left: 20px solid #FB8033;
+ }

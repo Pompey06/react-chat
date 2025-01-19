@@ -1,0 +1,18 @@
+.sidebar__icon {
+   max-width: 60px;
+   cursor: pointer;
+}
+
+.sidebar {
+   border-radius: 10px;
+}
+
+@media (max-width:1024px) {
+   .sidebar__icon {
+      max-width: 44px;
+
+   }
+   .sidebar {
+      border-radius: 10px;
+   }
+}

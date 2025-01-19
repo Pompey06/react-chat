@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-blue {
+   background: #0B427B !important;
+}
+
+.color-blue {
+   color: #0B427B;
+}
+
+.bg-gray {
+   background: #EEE;
+}
+
+body {
+   background: #EEE;
+}
+
+
+

@@ -1,0 +1,13 @@
+.message-input {
+   padding: 28px 36px;
+   border-radius: 10px;
+border: 1px solid #0B427B;
+color: #878787;
+font-size: 20px;
+}
+
+@media (max-width:1024px) {
+   .message-input {
+      padding: 28px;
+   }
+}

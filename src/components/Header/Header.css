@@ -1,0 +1,12 @@
+.header {
+   border-bottom: 1px solid #D3D3D3;;
+}
+
+.language {
+border: 1px solid #0B427B;
+border-radius: 5px;
+}
+
+.language__button {
+   padding: 5px 16px;
+}
