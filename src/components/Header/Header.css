@@ -10,3 +10,22 @@ border-radius: 5px;
 .language__button {
    padding: 5px 16px;
 }
+
+.header__burger-icon {
+   width: 40px;
+   height: 40px;
+   cursor: pointer;
+ }
+ 
+ @media (min-width: 700px) {
+   .header__burger-icon {
+     display: none;
+   }
+ }
+
+ @media (max-width:700px) {
+   .header {
+      justify-content: space-between;
+      width: 100%;
+   }
+ }

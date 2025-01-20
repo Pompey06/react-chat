@@ -22,5 +22,8 @@ body {
 
 
 .message-list {
-  max-height: calc(100vh - 300px) !important;
+  max-height: calc(100vh - 160px) !important;
 }
+
+
+

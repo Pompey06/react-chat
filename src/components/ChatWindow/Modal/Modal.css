@@ -35,3 +35,9 @@ background:#EEE;
  .modal {
    border-left: 20px solid #FB8033;
  }
+
+ /*@media (max-width:700px) {
+   .modal {
+      padding-left: 14px;
+   }
+ }*/

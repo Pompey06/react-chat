@@ -35,8 +35,8 @@ export default function Modal({ isOpen, onClose, title, description }) {
 
             {/* Modal content */}
             <div className="bg-white modal p-8">
-              <h2 className="font-light text-2xl/6 mb-1">{title}</h2>
-              <p className="font-light text-base/4 mb-3">{description}</p>
+              <h2 className="font-light text-2xl/6 mb-2">{title}</h2>
+              <p className="font-light text-base/6 mb-3">{description}</p>
 
               {/* Textarea for feedback */}
               <textarea

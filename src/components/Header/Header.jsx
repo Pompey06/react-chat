@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import './Header.css'
+import React from 'react';
+import './Header.css';
+import burgerBlue from '../../assets/burger-blue.svg';
 
-const Header = () => {
-  const [language, setLanguage] = useState('русc'); // Текущий язык
+const Header = ({ isSidebarOpen, toggleSidebar }) => {
+  const [language, setLanguage] = React.useState('русc'); // Текущий язык
 
   const handleLanguageChange = (lang) => {
     setLanguage(lang);
@@ -10,7 +11,14 @@ const Header = () => {
   };
 
   return (
-    <div className=" h-[83px] header border-b-1 border-solid border- flex items-center justify-end">
+    <div className="h-[83px] justify-end header border-b-1 border-solid flex items-center px-4">
+      {/* Иконка открытия боковой панели для мобильных устройств */}
+      <img
+        src={burgerBlue}
+        alt="Menu"
+        className={`header__burger-icon ${isSidebarOpen ? 'hidden' : 'block'} md:hidden`}
+        onClick={toggleSidebar} // Вызываем toggleSidebar при клике
+      />
       <div className="flex language">
         <button
           className={`language__button rounded ${
