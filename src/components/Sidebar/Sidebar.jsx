@@ -5,8 +5,10 @@ import newChat from '../../assets/new.svg';
 import previousChat from '../../assets/previous.svg';
 
 import SidebarButton from '../SidebarButton/SidebarButton';
+import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
 
 export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
+  const { t } = useTranslation(); // Инициализируем хук для перевода
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   // Обновляем состояние isMobile при изменении ширины окна
@@ -22,11 +24,11 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
   }, []);
 
   const handleNewChat = () => {
-    // Логика для нового чата
+    // Логика для создания нового чата
   };
 
   const handlePreviousRequest = () => {
-    // Логика для предыдущего запроса
+    // Логика для обработки предыдущего запроса
   };
 
   return (
@@ -42,24 +44,24 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
         onClick={toggleSidebar} // Вызываем toggleSidebar при клике
         src={burger}
         className="sidebar__icon self-end cursor-pointer"
-        alt="Close Sidebar"
+        alt={t('sidebar.close')} // Перевод строки "Закрыть боковую панель"
       />
       {/* Условие отображения кнопок */}
       {(isMobile ? isSidebarOpen : !isSidebarOpen) && ( // Логика для мобильных и компьютеров
         <div className="sidebar__buttons flex justify-start flex-col gap-2.5 mt-16">
           <SidebarButton
-            text="Новый чат"
-            icon={<img src={newChat} alt="New Chat" className="w-5 h-5" />}
+            text={t('sidebar.newChat')} // Перевод строки "Новый чат"
+            icon={<img src={newChat} alt={t('sidebar.newChat')} className="w-5 h-5" />}
             onClick={handleNewChat}
           />
           <SidebarButton
-            text="Прошлый запрос"
-            icon={<img src={previousChat} alt="Previous Chat" className="w-5 h-5" />}
+            text={t('sidebar.previousRequest')} // Перевод строки "Прошлый запрос"
+            icon={<img src={previousChat} alt={t('sidebar.previousRequest')} className="w-5 h-5" />}
             onClick={handlePreviousRequest}
           />
-          <SidebarButton
-            text="Прошлый запрос"
-            icon={<img src={previousChat} alt="Previous Chat" className="w-5 h-5" />}
+         <SidebarButton
+            text={t('sidebar.previousRequest')} // Перевод строки "Прошлый запрос"
+            icon={<img src={previousChat} alt={t('sidebar.previousRequest')} className="w-5 h-5" />}
             onClick={handlePreviousRequest}
           />
         </div>

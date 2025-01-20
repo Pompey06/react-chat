@@ -3,14 +3,18 @@ import Message from '../Message/Message';
 import FeedbackMessage from '../FeeadbackMessage/FeedbackMessage';
 import Header from '../../Header/Header';
 import Sidebar from '../../Sidebar/Sidebar';
+import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
 
 export default function MessageList({ isSidebarOpen, toggleSidebar }) {
+  const { t } = useTranslation(); // Инициализируем хук для перевода
+
+  // Список сообщений с использованием ключей для перевода
   const messages = [
-    { id: 1, text: 'Мне нужно заполнить статистическую форму', isUser: true },
-    { id: 2, text: 'Хорошо, давайте уточним. Какую форму вы хотите заполнить?', isUser: false },
-    { id: 3, text: 'Спасибо, я заполню позже', isUser: true },
-    { id: 4, text: 'Понял вас! Если вам понадобится помощь, просто напишите. Хорошего дня!', isUser: false },
-    { id: 5, text: 'Оцените качество ответа', isUser: false, isFeedback: true },
+    { id: 1, text: t('messages.userMessage1'), isUser: true },
+    { id: 2, text: t('messages.botMessage1'), isUser: false },
+    { id: 3, text: t('messages.userMessage2'), isUser: true },
+    { id: 4, text: t('messages.botMessage2'), isUser: false },
+    { id: 5, text: t('messages.feedbackPrompt'), isUser: false, isFeedback: true },
   ];
 
   const scrollTargetRef = useRef(null);

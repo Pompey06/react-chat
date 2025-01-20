@@ -1,13 +1,17 @@
 import React from 'react';
 import './Header.css';
 import burgerBlue from '../../assets/burger-blue.svg';
+import { useTranslation } from 'react-i18next';
 
 const Header = ({ isSidebarOpen, toggleSidebar }) => {
+
+   const { i18n } = useTranslation(); // Хук для перевода
+   
   const [language, setLanguage] = React.useState('русc'); // Текущий язык
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-    // Здесь можно добавить логику для смены языка в приложении
+   i18n.changeLanguage(lang);
+   setLanguage(lang);
   };
 
   return (
