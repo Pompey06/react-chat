@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import './MessageInput.css';
 import sendIcon from '../../../assets/send.svg';
 import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
+import { ChatContext } from '../../../context/ChatContext';
 
 export default function MessageInput() {
   const { t } = useTranslation(); // Инициализируем хук для перевода
   const [message, setMessage] = useState('');
 
-  const handleSend = () => {
+  const {createMessage} = useContext(ChatContext)
+
+
+  
+
+  const handleSend = async () => {
+
+   createMessage(message);
     console.log(t('messageInput.sentMessage'), message); // Логируем перевод строки "Отправлено сообщение"
     setMessage(''); // Очистить поле ввода
   };

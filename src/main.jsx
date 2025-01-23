@@ -4,9 +4,12 @@ import './index.css'
 import './null.css'
 import App from './App.jsx'
 import './i18n';
+import {ChatProvider} from './context/ChatContext.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+   <ChatProvider>
+      <StrictMode>
+         <App />
+      </StrictMode>
+  </ChatProvider>
 )
