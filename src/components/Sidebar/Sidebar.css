@@ -12,6 +12,10 @@
    cursor: pointer;
  }
  
+ .sidebar__button_active {
+   background: red;
+}
+
  @media (max-width: 1024px) {
    .sidebar__icon {
      max-width: 44px;

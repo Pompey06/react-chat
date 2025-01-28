@@ -1,0 +1,26 @@
+.typing-container {
+   display: inline-flex;
+   align-items: center;
+   font-size: 20px;
+   color: rgb(148, 148, 148);
+ }
+ 
+ .dot {
+   opacity: 0;
+   animation: blink 1s infinite;
+ }
+ 
+ .dot.one {
+   animation-delay: 0s;
+ }
+ .dot.two {
+   animation-delay: 0.3s;
+ }
+ .dot.three {
+   animation-delay: 0.6s;
+ }
+ 
+ @keyframes blink {
+   0%, 100% { opacity: 0; }
+   50% { opacity: 1; }
+ }
