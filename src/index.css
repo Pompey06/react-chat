@@ -22,9 +22,15 @@ body {
 
 
 .message-list {
-  max-height: calc(100vh - 160px) !important;
-  min-height: calc(100vh - 160px) !important;
+  max-height: calc(100vh - 300px) !important;
+  min-height: calc(100vh - 300px) !important;
 }
 
+@media (max-width:700px) {
+   .message-list {
+      max-height: calc(100vh - 160px) !important;
+      min-height: calc(100vh - 160px) !important;
+    }
+}
 
 
