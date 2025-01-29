@@ -19,18 +19,33 @@ body {
 }
 
 
-
-
-.message-list {
-  max-height: calc(100vh - 300px) !important;
-  min-height: calc(100vh - 300px) !important;
+.wrapper {
+   padding-top: 20px;
 }
 
-@media (max-width:700px) {
+.message-list {
+  max-height: calc(100vh - 240px) !important;
+  min-height: calc(100vh - 240px) !important;
+}
+
+@media (max-width:1024px) {
+
    .message-list {
       max-height: calc(100vh - 160px) !important;
       min-height: calc(100vh - 160px) !important;
     }
 }
+
+@media (max-width:700px) {
+   .message-list {
+      max-height: calc(100vh - 200px) !important;
+      min-height: calc(100vh - 200px) !important;
+    }
+    .wrapper {
+      padding-bottom: 0;
+   }
+}
+
+
 
 

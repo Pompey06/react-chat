@@ -13,7 +13,7 @@ function App() {
 
   return (
     <>
-      <div className="flex relative pb-11 items-stretch px-6 lg:p-16 gap-10 xl:gap-20">
+      <div className="flex wrapper relative pb-11 items-stretch px-6 gap-10 xl:gap-20">
         {/* Передаём состояние и функцию в Sidebar */}
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         <ChatWindow isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
