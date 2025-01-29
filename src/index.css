@@ -23,27 +23,46 @@ body {
    padding-top: 20px;
 }
 
+.message-list-wrap {
+   max-height: calc(100vh - 240px) !important;
+}
+
 .message-list {
-  max-height: calc(100vh - 240px) !important;
+   padding-top: 30px;
   min-height: calc(100vh - 240px) !important;
 }
 
-@media (max-width:1024px) {
+.sidebar {
+      max-height: calc(100vh - 40px) !important;
+}
 
-   .message-list {
+@media (max-width:1024px) {
+   .message-list-wrap {
       max-height: calc(100vh - 160px) !important;
+   }
+   .message-list {
+      
       min-height: calc(100vh - 160px) !important;
     }
+    .sidebar {
+      max-height: calc(100vh + 20px) !important;
+}
 }
 
 @media (max-width:700px) {
-   .message-list {
+   .message-list-wrap {
       max-height: calc(100vh - 200px) !important;
+   }
+   .message-list {
+      
       min-height: calc(100vh - 200px) !important;
     }
     .wrapper {
       padding-bottom: 0;
    }
+   .sidebar {
+      max-height: 100vh !important;
+}
 }
 
 

@@ -3,8 +3,9 @@
    transition: transform 0.3s ease-in-out;
  }
  
- .sidebar--open {
+ .sidebar--close {
    transform: translateX(0);
+   min-width: 116px !important;
  }
  
  .sidebar__icon {
@@ -34,7 +35,7 @@
      transition: transform 0.3s ease-in-out;
    }
  
-   .sidebar--open {
+   .sidebar--close {
      left: 0;
    }
  }

@@ -7,7 +7,7 @@ import goodIcon from '../../../assets/good.svg';
 import goodIconHover from '../../../assets/good-white.svg'; // Иконка при наведении
 import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
 
-export default function FeedbackMessage({ text }) {
+export default function FeedbackMessage() {
   const { t } = useTranslation(); // Инициализируем хук для перевода
   const [modalType, setModalType] = useState(null); // null, 'good', 'bad'
   const [hoveredButton, setHoveredButton] = useState(null); // null, 'good', 'bad'
@@ -17,7 +17,7 @@ export default function FeedbackMessage({ text }) {
 
   return (
     <div className="feedback-message message mb-8 bg-white flex font-light flex-col items-start">
-      <p className="text-black mb-6">{text}</p>
+      <p className="text-black mb-6">{t('feedback.requestFeedback')}</p>
       <div className="flex gap-6 feedback-message__btns">
         {/* Кнопка "Хорошо" */}
         <button

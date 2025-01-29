@@ -3,6 +3,7 @@
    align-items: center;
    font-size: 20px;
    color: rgb(148, 148, 148);
+   margin-bottom: 20px;
  }
  
  .dot {
@@ -24,3 +25,9 @@
    0%, 100% { opacity: 0; }
    50% { opacity: 1; }
  }
+
+ @media (max-width:700px) {
+   .typing-container {
+      font-size: 16px;
+   }
+}

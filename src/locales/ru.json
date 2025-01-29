@@ -3,10 +3,14 @@
      "feedbackPrompt": "Оцените качество ответа",
      "noMessagesInChat": "Нет сообщений в этом чате"
    },
+   "chat": {
+    "suggestionText": "Возможно вы искали ..."
+  },
    "sidebar": {
     "close": "Закрыть боковую панель",
     "newChat": "Новый чат",
-    "previousRequest": "Прошлый запрос"
+    "previousRequest": "Прошлый запрос",
+    "previousChat": "Прошлый чат {{number}}"
   },
   "feedback": {
     "good": "Хорошо",
@@ -18,7 +22,8 @@
     "goodModalTitle": "Спасибо за вашу оценку!",
     "goodModalDescription": "Мы рады, что вам понравилось. Хотите поделиться, что именно вам понравилось в ответе?",
     "badModalTitle": "Нам жаль, что вы остались недовольны.",
-    "badModalDescription": "Мы хотим стать лучше! Расскажите, что можно улучшить."
+    "badModalDescription": "Мы хотим стать лучше! Расскажите, что можно улучшить.",
+    "requestFeedback": "Оцените качество ответа"
   },
    "modal": {
     "close": "Закрыть",

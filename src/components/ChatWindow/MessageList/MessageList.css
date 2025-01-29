@@ -1,3 +1,13 @@
 .typing {
    font-size: 20px;
 }
+
+.suggestion-text {
+   color: #878787;
+font-size: 16px;
+font-weight: 300;
+text-align: right;
+margin-bottom: 20px;
+margin-top: -15px;
+}
+

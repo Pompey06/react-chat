@@ -6,7 +6,8 @@
    "sidebar": {
     "close": "Бүйірлік панельді жабу",
     "newChat": "Жаңа чат",
-    "previousRequest": "Алдыңғы сұрау"
+    "previousRequest": "Алдыңғы сұрау",
+    "previousChat": "Алдыңғы чат {{number}}"
   },
   "feedback": {
     "good": "Жақсы",
@@ -18,7 +19,8 @@
     "goodModalTitle": "Сіздің бағаңыз үшін рахмет!",
     "goodModalDescription": "Сізге ұнағанына қуаныштымыз. Жауаптың қай жері ұнағанын бөлісесіз бе?",
     "badModalTitle": "Сізге ұнамағанына өкінеміз.",
-    "badModalDescription": "Біз жақсарғымыз келеді! Не жақсартуға болатынын айтыңыз."
+    "badModalDescription": "Біз жақсарғымыз келеді! Не жақсартуға болатынын айтыңыз.",
+    "requestFeedback": "Жауаптың сапасын бағалаңыз"
   },
   "modal": {
     "close": "Жабу",
@@ -36,5 +38,8 @@
   },
   "chatTyping": {
     "typingMessage": "Жазып жатыр"
-  }
+  },
+  "chat": {
+   "suggestionText": "Мүмкін сіз іздеген боларсыз ..."
+ }
  }
