@@ -44,32 +44,40 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
       )}
 
 <div className='overflow-y-auto message-list-wrap'>
-         <div className="message-list justify-end flex flex-col ">
-         {showInitialButtons && (
-             <div className="suggestion-text mt-4">
-               {t('chat.suggestionText')}
-             </div>
-           )}
-           {messages.map((message, index) =>
-             message.isFeedback ? (
-               <FeedbackMessage key={index} text={message.text} />
-             ) : (
-               <Message
-                 key={index}
-                 text={message.text}
-                 isUser={message.isUser}
-                 isButton={showInitialButtons && message.isButton} // Показываем кнопки, если они активны
-                 onClick={() => handleButtonClick(message.text)} // Обработчик клика
-               />
-             )
-           )}
-   
-   
-   
-           {isTyping && <TypingIndicator text={t('chatTyping.typingMessage')} />}
-   
-           <div ref={scrollTargetRef}></div>
-         </div>
+<div className="message-list justify-end flex flex-col">
+  {messages.map((message, index) => {
+    const isFirstMessage = index === 0;
+
+    return (
+      <React.Fragment key={index}>
+        {/* Рендерим сообщение */}
+        {message.isFeedback ? (
+          <FeedbackMessage text={message.text} />
+        ) : (
+          <Message
+            text={message.text}
+            isUser={message.isUser}
+            isButton={showInitialButtons && message.isButton} // Показываем кнопки, если они активны
+            onClick={() => handleButtonClick(message.text)} // Обработчик клика
+          />
+        )}
+
+        {/* Рендерим suggestion-text только после первого сообщения */}
+        {isFirstMessage && showInitialButtons && (
+          <div className="suggestion-text mt-4">
+            {t('chat.suggestionText')}
+          </div>
+        )}
+      </React.Fragment>
+    );
+  })}
+
+  {/* Рендерим индикатор печати */}
+  {isTyping && <TypingIndicator text={t('chatTyping.typingMessage')} />}
+
+  {/* Скроллим вниз при добавлении новых сообщений */}
+  <div ref={scrollTargetRef}></div>
+</div>
 </div>
     </div>
   );

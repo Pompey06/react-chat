@@ -13,13 +13,20 @@ const ChatProvider = ({ children }) => {
 
   // 1) Сразу создаём один пустой чат (чтобы пользователь мог сразу отправлять сообщения)
   const defaultChat = {
-    id: generateId(),
-    messages: [],
-    isEmpty: true, // Новый флаг для проверки, пустой ли чат
-    showInitialButtons: true, // Показывать ли кнопки в этом чате
-    buttonsWereHidden: false, // Флаг, указывающий, что кнопки уже были скрыты
-    buttonsWereShown: false // Флаг, указывающий, что кнопки уже были показаны
-  };
+   id: generateId(),
+   messages: [
+     {
+      text: t('chat.greeting'),
+       isUser: false, // Сообщение от бота
+       isFeedback: false,
+       isButton: false
+     }
+   ],
+   isEmpty: true, // Новый флаг для проверки, пустой ли чат
+   showInitialButtons: true, // Показывать ли кнопки в этом чате
+   buttonsWereHidden: false, // Флаг, указывающий, что кнопки уже были скрыты
+   buttonsWereShown: false // Флаг, указывающий, что кнопки уже были показаны
+ };
 
   const [chats, setChats] = useState([defaultChat]);
   const [currentChatId, setCurrentChatId] = useState(defaultChat.id);
@@ -70,33 +77,41 @@ const ChatProvider = ({ children }) => {
   }, [currentChatId]); // Выполняется при смене текущего чата
 
   const createNewChat = () => {
-    const currentChat = chats.find((c) => c.id === currentChatId);
-    if (!currentChat) return;
-
-    // Если текущий чат пустой, не создаём новый
-    if (currentChat.isEmpty) {
-      return;
-    }
-
-    // Проверяем, есть ли уже пустой чат
-    const emptyChat = chats.find((c) => c.id !== currentChatId && c.isEmpty);
-    if (emptyChat) {
-      setCurrentChatId(emptyChat.id);
-      return;
-    }
-
-    // Создаём новый пустой чат
-    const newChat = {
-      id: generateId(),
-      messages: [],
-      isEmpty: true, // Новый чат всегда пустой
-      showInitialButtons: true, // В новом чате кнопки должны быть видимы
-      buttonsWereHidden: false, // Кнопки ещё не скрыты
-      buttonsWereShown: false // Кнопки ещё не были показаны
-    };
-    setChats((prev) => [...prev, newChat]);
-    setCurrentChatId(newChat.id);
-  };
+   const currentChat = chats.find((c) => c.id === currentChatId);
+   if (!currentChat) return;
+ 
+   // Если текущий чат пустой, не создаём новый
+   if (currentChat.isEmpty) {
+     return;
+   }
+ 
+   // Проверяем, есть ли уже пустой чат
+   const emptyChat = chats.find((c) => c.id !== currentChatId && c.isEmpty);
+   if (emptyChat) {
+     setCurrentChatId(emptyChat.id);
+     return;
+   }
+ 
+   // Создаём новый пустой чат с первым сообщением от бота
+   const newChat = {
+     id: generateId(),
+     messages: [
+       {
+         text: t('chat.greeting'), // Используем перевод для первого сообщения
+         isUser: false, // Сообщение от бота
+         isFeedback: false,
+         isButton: false
+       }
+     ],
+     isEmpty: true, // Новый чат всегда пустой
+     showInitialButtons: true, // В новом чате кнопки должны быть видимы
+     buttonsWereHidden: false, // Кнопки ещё не скрыты
+     buttonsWereShown: false // Кнопки ещё не были показаны
+   };
+ 
+   setChats((prev) => [...prev, newChat]);
+   setCurrentChatId(newChat.id);
+ };
 
   const switchChat = (chatId) => {
     if (chatId === currentChatId) {
@@ -222,6 +237,20 @@ const ChatProvider = ({ children }) => {
     }
   }
 
+  const removeFeedbackMessage = () => {
+   setChats((prevChats) =>
+     prevChats.map((chat) => {
+       if (chat.id === currentChatId) {
+         return {
+           ...chat,
+           messages: chat.messages.filter((message) => !message.isFeedback) // Удаляем сообщение с фидбеком
+         };
+       }
+       return chat;
+     })
+   );
+ };
+
   // Обработчик выбора кнопки
   const handleButtonClick = (value) => {
     setNarrowingFilter(value); // Сохраняем выбранное значение
@@ -253,6 +282,7 @@ const ChatProvider = ({ children }) => {
         switchChat,
         createMessage,
         handleButtonClick,
+        removeFeedbackMessage,
         showInitialButtons: chats.find((c) => c.id === currentChatId)?.showInitialButtons || false
       }}
     >

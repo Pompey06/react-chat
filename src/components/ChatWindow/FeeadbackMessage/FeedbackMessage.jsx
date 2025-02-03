@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // Добавляем useContext
+import { ChatContext } from '../../../context/ChatContext'; // Импортируем ChatContext
 import Modal from '../Modal/Modal';
 import './Feedbackmessage.css';
 import badIcon from '../../../assets/bad.svg';
-import badIconHover from '../../../assets/bad-white.svg'; // Иконка при наведении
+import badIconHover from '../../../assets/bad-white.svg';
 import goodIcon from '../../../assets/good.svg';
-import goodIconHover from '../../../assets/good-white.svg'; // Иконка при наведении
-import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
+import goodIconHover from '../../../assets/good-white.svg';
+import { useTranslation } from 'react-i18next';
 
 export default function FeedbackMessage() {
-  const { t } = useTranslation(); // Инициализируем хук для перевода
-  const [modalType, setModalType] = useState(null); // null, 'good', 'bad'
-  const [hoveredButton, setHoveredButton] = useState(null); // null, 'good', 'bad'
+  const { t } = useTranslation();
+  const { removeFeedbackMessage } = useContext(ChatContext); // Подключаем функцию из контекста
+  const [modalType, setModalType] = useState(null);
+  const [hoveredButton, setHoveredButton] = useState(null);
 
-  const openModal = (type) => setModalType(type); // Открыть модалку
-  const closeModal = () => setModalType(null); // Закрыть модалку
+  const openModal = (type) => {
+    setModalType(type);
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+  };
 
   return (
     <div className="feedback-message message mb-8 bg-white flex font-light flex-col items-start">
@@ -22,45 +29,45 @@ export default function FeedbackMessage() {
         {/* Кнопка "Хорошо" */}
         <button
           className="feedback-button flex gap-5 font-light bg-transparent text-black hover:text-white transition-colors duration-300"
-          onMouseEnter={() => setHoveredButton('good')} // Наведение мыши
-          onMouseLeave={() => setHoveredButton(null)} // Убираем наведение
-          onTouchStart={() => setHoveredButton('good')} // Для мобильных устройств
-          onTouchEnd={() => setHoveredButton(null)} // Убираем состояние при отпускании
+          onMouseEnter={() => setHoveredButton('good')}
+          onMouseLeave={() => setHoveredButton(null)}
+          onTouchStart={() => setHoveredButton('good')}
+          onTouchEnd={() => setHoveredButton(null)}
           onClick={() => openModal('good')}
         >
           <img
             className={`transition-opacity duration-300 ${hoveredButton === 'good' ? 'opacity-0' : 'opacity-100'}`}
             src={goodIcon}
-            alt={t('feedback.goodAlt')} // Перевод строки "Хорошо"
+            alt={t('feedback.goodAlt')}
           />
           <img
             className={`absolute transition-opacity duration-300 ${hoveredButton === 'good' ? 'opacity-100' : 'opacity-0'}`}
             src={goodIconHover}
-            alt={t('feedback.goodAltHover')} // Перевод строки "Хорошо (наведение)"
+            alt={t('feedback.goodAltHover')}
           />
-          {t('feedback.good')} {/* Перевод строки "Хорошо" */}
+          {t('feedback.good')}
         </button>
 
         {/* Кнопка "Плохо" */}
         <button
           className="feedback-button flex gap-5 font-light bg-transparent text-black hover:text-white transition-colors duration-300"
-          onMouseEnter={() => setHoveredButton('bad')} // Наведение мыши
-          onMouseLeave={() => setHoveredButton(null)} // Убираем наведение
-          onTouchStart={() => setHoveredButton('bad')} // Для мобильных устройств
-          onTouchEnd={() => setHoveredButton(null)} // Убираем состояние при отпускании
-          onClick={() => openModal('bad')} // Открываем модалку
+          onMouseEnter={() => setHoveredButton('bad')}
+          onMouseLeave={() => setHoveredButton(null)}
+          onTouchStart={() => setHoveredButton('bad')}
+          onTouchEnd={() => setHoveredButton(null)}
+          onClick={() => openModal('bad')}
         >
           <img
             className={`transition-opacity duration-300 ${hoveredButton === 'bad' ? 'opacity-0' : 'opacity-100'}`}
             src={badIcon}
-            alt={t('feedback.badAlt')} // Перевод строки "Плохо"
+            alt={t('feedback.badAlt')}
           />
           <img
             className={`absolute transition-opacity duration-300 ${hoveredButton === 'bad' ? 'opacity-100' : 'opacity-0'}`}
             src={badIconHover}
-            alt={t('feedback.badAltHover')} // Перевод строки "Плохо (наведение)"
+            alt={t('feedback.badAltHover')}
           />
-          {t('feedback.bad')} {/* Перевод строки "Плохо" */}
+          {t('feedback.bad')}
         </button>
       </div>
 
@@ -68,16 +75,18 @@ export default function FeedbackMessage() {
       <Modal
         isOpen={modalType === 'good'}
         onClose={closeModal}
-        title={t('feedback.goodModalTitle')} // Перевод заголовка модалки
-        description={t('feedback.goodModalDescription')} // Перевод описания модалки
+        title={t('feedback.goodModalTitle')}
+        description={t('feedback.goodModalDescription')}
+        onSubmit={removeFeedbackMessage} // Передаем функцию удаления
       />
 
       {/* Модалка для "Плохо" */}
       <Modal
         isOpen={modalType === 'bad'}
         onClose={closeModal}
-        title={t('feedback.badModalTitle')} // Перевод заголовка модалки
-        description={t('feedback.badModalDescription')} // Перевод описания модалки
+        title={t('feedback.badModalTitle')}
+        description={t('feedback.badModalDescription')}
+        onSubmit={removeFeedbackMessage} // Передаем функцию удаления
       />
     </div>
   );

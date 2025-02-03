@@ -6,18 +6,30 @@ import closeIcon from '../../../assets/close.svg';
 import './Modal.css';
 import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
 
-export default function Modal({ isOpen, onClose, title, description }) {
+export default function Modal({ isOpen, onClose, title, description, onSubmit }) {
   const { t } = useTranslation(); // Инициализируем хук для перевода
   const [feedback, setFeedback] = useState('');
+  const [isError, setIsError] = useState(false); // Состояние для ошибки
 
   const handleFeedbackChange = (event) => {
     setFeedback(event.target.value);
+    if (event.target.value.trim() !== '') {
+      setIsError(false); // Убираем ошибку, если пользователь ввел текст
+    }
   };
 
   const handleSubmit = () => {
+    if (feedback.trim() === '') {
+      setIsError(true); // Устанавливаем ошибку, если поле пустое
+      return;
+    }
+
     console.log(t('modal.feedbackSubmitted'), feedback); // Логируем перевод строки "Отзыв отправлен"
     setFeedback('');
-    onClose();
+    if (onSubmit) {
+      onSubmit(); // Удаляем сообщение с фидбеком из чата
+    }
+    onClose(); // Закрываем модалку
   };
 
   return (
@@ -42,7 +54,9 @@ export default function Modal({ isOpen, onClose, title, description }) {
 
               {/* Textarea for feedback */}
               <textarea
-                className="w-full h-64 p-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full h-64 p-4 focus:outline-none focus:ring-2 ${
+                  isError ? 'border-2 border-red-500' : 'focus:ring-blue-500'
+                }`}
                 placeholder={t('modal.placeholder')} // Перевод строки "Оставьте свой отзыв ..."
                 value={feedback}
                 onChange={handleFeedbackChange}
@@ -53,7 +67,7 @@ export default function Modal({ isOpen, onClose, title, description }) {
                 <button
                   type="button"
                   className="feedback__button bg-blue text-xl text-white text-sm font-light shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onClick={handleSubmit}
+                  onClick={handleSubmit} // Обработчик отправки
                 >
                   {t('modal.submit')} {/* Перевод строки "Отправить" */}
                 </button>
