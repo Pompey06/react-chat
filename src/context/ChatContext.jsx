@@ -2,45 +2,88 @@ import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
-function generateId() {
-  return Math.random().toString(36).substr(2, 9);
-}
-
 const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  // 1) Сразу создаём один пустой чат (чтобы пользователь мог сразу отправлять сообщения)
-  const defaultChat = {
-   id: generateId(),
-   messages: [
-     {
-      text: t('chat.greeting'),
-       isUser: false, // Сообщение от бота
-       isFeedback: false,
-       isButton: false
-     }
-   ],
-   isEmpty: true, // Новый флаг для проверки, пустой ли чат
-   showInitialButtons: true, // Показывать ли кнопки в этом чате
-   buttonsWereHidden: false, // Флаг, указывающий, что кнопки уже были скрыты
-   buttonsWereShown: false // Флаг, указывающий, что кнопки уже были показаны
- };
+  // Создаем функцию для генерации defaultChat с учетом данных с бэкенда
+  const createDefaultChat = (backendChat) => ({
+    id: backendChat.id,
+    title: backendChat.title,
+    created_at: backendChat.created_at,
+    messages: [
+      {
+        text: t('chat.greeting'),
+        isUser: false,
+        isFeedback: false,
+        isButton: false,
+      },
+    ],
+    isEmpty: true,
+    showInitialButtons: true,
+    buttonsWereHidden: false,
+    buttonsWereShown: false,
+  });
 
-  const [chats, setChats] = useState([defaultChat]);
-  const [currentChatId, setCurrentChatId] = useState(defaultChat.id);
-
+  const [chats, setChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [narrowingFilter, setNarrowingFilter] = useState(null); // Храним выбранное значение
+  const [categoryFilter, setCategoryFilter] = useState(null);
+  const [locale, setLocale] = useState('ru');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Функция для загрузки строк с API
+  // Загрузка чатов при инициализации
+  useEffect(() => {
+    const fetchInitialChat = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/my`);
+        const backendChat = response.data;
+        
+        const newChat = createDefaultChat(backendChat);
+        setChats([newChat]);
+        setCurrentChatId(newChat.id);
+      } catch (error) {
+        console.error('Error fetching initial chat:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialChat();
+  }, []);
+
+  // Обновляем чаты при изменении языка
+  useEffect(() => {
+    setChats(prevChats => 
+      prevChats.map(chat => ({
+        ...chat,
+        messages: chat.messages.map(message => 
+          message.text === chat.messages[0].text
+            ? { ...message, text: t('chat.greeting') }
+            : message
+        )
+      }))
+    );
+  }, [i18n.language, t]);
+
+  useEffect(() => {
+    const currentLanguage = i18n.language === 'қаз' ? 'kz' : 'ru';
+    setLocale(currentLanguage);
+  }, [i18n.language]);
+
+  const updateLocale = (lang) => {
+    const newLocale = lang === 'қаз' ? 'kz' : 'ru';
+    setLocale(newLocale);
+    i18n.changeLanguage(lang);
+  };
+
   const fetchInitialMessages = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/assistant/narrowing-filters`);
-      const messages = res.data; // Ожидаем массив строк
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/assistant/category-filters`);
+      const messages = res.data;
 
-      // Добавляем каждую строку как сообщение пользователя
       setChats((prev) =>
         prev.map((chat) => {
           if (chat.id === currentChatId) {
@@ -50,12 +93,12 @@ const ChatProvider = ({ children }) => {
                 ...chat.messages,
                 ...messages.map((text) => ({
                   text,
-                  isUser: true, // Сообщения выглядят как пользовательские
+                  isUser: true,
                   isFeedback: false,
-                  isButton: true // Указываем, что это кнопка
-                }))
+                  isButton: true,
+                })),
               ],
-              buttonsWereShown: true // Фиксируем, что кнопки были показаны
+              buttonsWereShown: true,
             };
           }
           return chat;
@@ -66,52 +109,41 @@ const ChatProvider = ({ children }) => {
     }
   };
 
-  // Загружаем данные при монтировании
   useEffect(() => {
     const currentChat = chats.find((chat) => chat.id === currentChatId);
 
-    // Загружаем кнопки только если они ещё не были показаны и не скрыты
     if (currentChat && !currentChat.buttonsWereShown && !currentChat.buttonsWereHidden) {
       fetchInitialMessages();
     }
-  }, [currentChatId]); // Выполняется при смене текущего чата
+  }, [currentChatId]);
 
-  const createNewChat = () => {
-   const currentChat = chats.find((c) => c.id === currentChatId);
-   if (!currentChat) return;
- 
-   // Если текущий чат пустой, не создаём новый
-   if (currentChat.isEmpty) {
-     return;
-   }
- 
-   // Проверяем, есть ли уже пустой чат
-   const emptyChat = chats.find((c) => c.id !== currentChatId && c.isEmpty);
-   if (emptyChat) {
-     setCurrentChatId(emptyChat.id);
-     return;
-   }
- 
-   // Создаём новый пустой чат с первым сообщением от бота
-   const newChat = {
-     id: generateId(),
-     messages: [
-       {
-         text: t('chat.greeting'), // Используем перевод для первого сообщения
-         isUser: false, // Сообщение от бота
-         isFeedback: false,
-         isButton: false
-       }
-     ],
-     isEmpty: true, // Новый чат всегда пустой
-     showInitialButtons: true, // В новом чате кнопки должны быть видимы
-     buttonsWereHidden: false, // Кнопки ещё не скрыты
-     buttonsWereShown: false // Кнопки ещё не были показаны
-   };
- 
-   setChats((prev) => [...prev, newChat]);
-   setCurrentChatId(newChat.id);
- };
+  const createNewChat = async () => {
+    const currentChat = chats.find((c) => c.id === currentChatId);
+    if (!currentChat) return;
+
+    if (currentChat.isEmpty) {
+      return;
+    }
+
+    const emptyChat = chats.find((c) => c.id !== currentChatId && c.isEmpty);
+    if (emptyChat) {
+      setCurrentChatId(emptyChat.id);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/my`);
+      const backendChat = response.data;
+      
+      const newChat = createDefaultChat(backendChat);
+      setChats(prev => [...prev, newChat]);
+      setCurrentChatId(newChat.id);
+      
+      return newChat;
+    } catch (error) {
+      console.error('Error creating new chat:', error);
+    }
+  };
 
   const switchChat = (chatId) => {
     if (chatId === currentChatId) {
@@ -120,29 +152,26 @@ const ChatProvider = ({ children }) => {
     setCurrentChatId(chatId);
   };
 
-  // Добавляем сообщение (сначала пользовательское, потом ответ сервера)
   async function createMessage(text, isFeedback = false) {
     if (!currentChatId) {
       return;
     }
 
-    // 1) Убираем кнопки, если они ещё отображаются
     setChats((prev) =>
       prev.map((chat) => {
         if (chat.id === currentChatId) {
           return {
             ...chat,
-            isEmpty: false, // Чат больше не пустой
-            showInitialButtons: false, // Скрываем кнопки
-            buttonsWereHidden: true, // Фиксируем, что кнопки были скрыты
-            messages: chat.messages.filter((message) => !message.isButton) // Убираем кнопки
+            isEmpty: false,
+            showInitialButtons: false,
+            buttonsWereHidden: true,
+            messages: chat.messages.filter((message) => !message.isButton),
           };
         }
         return chat;
       })
     );
 
-    // 2) Добавляем сообщение пользователя
     setChats((prev) =>
       prev.map((chat) => {
         if (chat.id === currentChatId) {
@@ -153,16 +182,15 @@ const ChatProvider = ({ children }) => {
               {
                 text,
                 isUser: true,
-                isFeedback
-              }
-            ]
+                isFeedback,
+              },
+            ],
           };
         }
         return chat;
       })
     );
 
-    // Отображаем "печатает..."
     setIsTyping(true);
     try {
       const res = await axios.post(
@@ -171,16 +199,17 @@ const ChatProvider = ({ children }) => {
         {
           params: {
             prompt: text,
-            narrowing_filter: narrowingFilter || undefined // Отправляем фильтр, если он выбран
-          }
+            category_filter: categoryFilter || undefined,
+            locale,
+            conversation_id: currentChatId,
+          },
         }
       );
 
-      // Ответ сервера
       const botMessage = {
         text: res.data.content,
         isUser: false,
-        isFeedback: false // Обычное сообщение от бота
+        isFeedback: false,
       };
 
       setChats((prev) =>
@@ -188,18 +217,17 @@ const ChatProvider = ({ children }) => {
           if (chat.id === currentChatId) {
             return {
               ...chat,
-              messages: [...chat.messages, botMessage]
+              messages: [...chat.messages, botMessage],
             };
           }
           return chat;
         })
       );
 
-      // Добавляем сообщение с фидбеком
       const feedbackMessage = {
         text: t('feedback.requestFeedback'),
         isUser: false,
-        isFeedback: true
+        isFeedback: true,
       };
 
       setChats((prev) =>
@@ -207,7 +235,7 @@ const ChatProvider = ({ children }) => {
           if (chat.id === currentChatId) {
             return {
               ...chat,
-              messages: [...chat.messages, feedbackMessage]
+              messages: [...chat.messages, feedbackMessage],
             };
           }
           return chat;
@@ -218,7 +246,7 @@ const ChatProvider = ({ children }) => {
       const errorMessage = {
         text: t('chatError.errorMessage'),
         isUser: false,
-        isFeedback
+        isFeedback,
       };
 
       setChats((prev) =>
@@ -226,7 +254,7 @@ const ChatProvider = ({ children }) => {
           if (chat.id === currentChatId) {
             return {
               ...chat,
-              messages: [...chat.messages, errorMessage]
+              messages: [...chat.messages, errorMessage],
             };
           }
           return chat;
@@ -238,33 +266,31 @@ const ChatProvider = ({ children }) => {
   }
 
   const removeFeedbackMessage = () => {
-   setChats((prevChats) =>
-     prevChats.map((chat) => {
-       if (chat.id === currentChatId) {
-         return {
-           ...chat,
-           messages: chat.messages.filter((message) => !message.isFeedback) // Удаляем сообщение с фидбеком
-         };
-       }
-       return chat;
-     })
-   );
- };
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat.id === currentChatId) {
+          return {
+            ...chat,
+            messages: chat.messages.filter((message) => !message.isFeedback),
+          };
+        }
+        return chat;
+      })
+    );
+  };
 
-  // Обработчик выбора кнопки
   const handleButtonClick = (value) => {
-    setNarrowingFilter(value); // Сохраняем выбранное значение
+    setCategoryFilter(value);
 
-    // Убираем кнопки из сообщений и помечаем чат как "не пустой"
     setChats((prev) =>
       prev.map((chat) => {
         if (chat.id === currentChatId) {
           return {
             ...chat,
-            isEmpty: false, // Чат больше не пустой
-            showInitialButtons: false, // Скрываем кнопки
-            buttonsWereHidden: true, // Фиксируем, что кнопки были скрыты
-            messages: chat.messages.filter((message) => !message.isButton)
+            isEmpty: false,
+            showInitialButtons: false,
+            buttonsWereHidden: true,
+            messages: chat.messages.filter((message) => !message.isButton),
           };
         }
         return chat;
@@ -278,12 +304,14 @@ const ChatProvider = ({ children }) => {
         chats,
         currentChatId,
         isTyping,
+        isLoading,
         createNewChat,
         switchChat,
         createMessage,
         handleButtonClick,
         removeFeedbackMessage,
-        showInitialButtons: chats.find((c) => c.id === currentChatId)?.showInitialButtons || false
+        showInitialButtons: chats.find((c) => c.id === currentChatId)?.showInitialButtons || false,
+        updateLocale,
       }}
     >
       {children}

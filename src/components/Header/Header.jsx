@@ -2,16 +2,18 @@ import React from 'react';
 import './Header.css';
 import burgerBlue from '../../assets/burger-blue.svg';
 import { useTranslation } from 'react-i18next';
+import { useContext } from 'react';
+import { ChatContext } from '../../context/ChatContext'; // Путь к ChatProvider
 
 const Header = ({ isSidebarOpen, toggleSidebar }) => {
+  const { i18n } = useTranslation(); // Хук для перевода
+  const { updateLocale } = useContext(ChatContext); // Получаем функцию из контекста
 
-   const { i18n } = useTranslation(); // Хук для перевода
-   
   const [language, setLanguage] = React.useState('русc'); // Текущий язык
 
   const handleLanguageChange = (lang) => {
-   i18n.changeLanguage(lang);
-   setLanguage(lang);
+    setLanguage(lang);
+    updateLocale(lang); // Вызываем функцию для обновления языка
   };
 
   return (
