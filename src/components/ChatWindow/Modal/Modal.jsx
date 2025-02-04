@@ -1,14 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import closeIcon from '../../../assets/close.svg';
 import './Modal.css';
 import { useTranslation } from 'react-i18next'; // Импортируем хук для перевода
+import { ChatContext } from '../../../context/ChatContext';
 
-export default function Modal({ isOpen, onClose, title, description, onSubmit }) {
-  const { t } = useTranslation(); // Инициализируем хук для перевода
+
+export default function Modal({ isOpen, onClose, title, description, onSubmit, feedbackType, messageIndex }) {
+   const { sendFeedback } = useContext(ChatContext);
+   const { t } = useTranslation(); // Инициализируем хук для перевода
   const [feedback, setFeedback] = useState('');
+
   const [isError, setIsError] = useState(false); // Состояние для ошибки
 
   const handleFeedbackChange = (event) => {
@@ -18,19 +22,23 @@ export default function Modal({ isOpen, onClose, title, description, onSubmit })
     }
   };
 
-  const handleSubmit = () => {
-    if (feedback.trim() === '') {
-      setIsError(true); // Устанавливаем ошибку, если поле пустое
-      return;
-    }
+  const handleSubmit = async () => {
+   if (feedback.trim() === '') {
+     setIsError(true);
+     return;
+   }
 
-    console.log(t('modal.feedbackSubmitted'), feedback); // Логируем перевод строки "Отзыв отправлен"
-    setFeedback('');
-    if (onSubmit) {
-      onSubmit(); // Удаляем сообщение с фидбеком из чата
-    }
-    onClose(); // Закрываем модалку
-  };
+   try {
+     await sendFeedback(feedbackType, feedback, messageIndex);
+     setFeedback('');
+     if (onSubmit) {
+       onSubmit();
+     }
+     onClose();
+   } catch (error) {
+     console.error('Error submitting feedback:', error);
+   }
+ };
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-10">

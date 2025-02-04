@@ -8,7 +8,7 @@ import goodIcon from '../../../assets/good.svg';
 import goodIconHover from '../../../assets/good-white.svg';
 import { useTranslation } from 'react-i18next';
 
-export default function FeedbackMessage() {
+export default function FeedbackMessage({ messageIndex }) {
   const { t } = useTranslation();
   const { removeFeedbackMessage } = useContext(ChatContext); // Подключаем функцию из контекста
   const [modalType, setModalType] = useState(null);
@@ -77,7 +77,9 @@ export default function FeedbackMessage() {
         onClose={closeModal}
         title={t('feedback.goodModalTitle')}
         description={t('feedback.goodModalDescription')}
-        onSubmit={removeFeedbackMessage} // Передаем функцию удаления
+        onSubmit={removeFeedbackMessage}
+        feedbackType="good"
+        messageIndex={messageIndex}
       />
 
       {/* Модалка для "Плохо" */}
@@ -86,7 +88,9 @@ export default function FeedbackMessage() {
         onClose={closeModal}
         title={t('feedback.badModalTitle')}
         description={t('feedback.badModalDescription')}
-        onSubmit={removeFeedbackMessage} // Передаем функцию удаления
+        onSubmit={removeFeedbackMessage}
+        feedbackType="bad"
+        messageIndex={messageIndex}
       />
     </div>
   );

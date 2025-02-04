@@ -7,11 +7,9 @@ const ChatContext = createContext();
 const ChatProvider = ({ children }) => {
   const { t, i18n } = useTranslation();
 
-  // Создаем функцию для генерации defaultChat с учетом данных с бэкенда
-  const createDefaultChat = (backendChat) => ({
-    id: backendChat.id,
-    title: backendChat.title,
-    created_at: backendChat.created_at,
+  const createDefaultChat = () => ({
+    id: null,
+    title: null,
     messages: [
       {
         text: t('chat.greeting'),
@@ -26,35 +24,12 @@ const ChatProvider = ({ children }) => {
     buttonsWereShown: false,
   });
 
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState(() => [createDefaultChat()]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [locale, setLocale] = useState('ru');
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Загрузка чатов при инициализации
-  useEffect(() => {
-    const fetchInitialChat = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/my`);
-        const backendChat = response.data;
-        
-        const newChat = createDefaultChat(backendChat);
-        setChats([newChat]);
-        setCurrentChatId(newChat.id);
-      } catch (error) {
-        console.error('Error fetching initial chat:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialChat();
-  }, []);
-
-  // Обновляем чаты при изменении языка
   useEffect(() => {
     setChats(prevChats => 
       prevChats.map(chat => ({
@@ -86,7 +61,7 @@ const ChatProvider = ({ children }) => {
 
       setChats((prev) =>
         prev.map((chat) => {
-          if (chat.id === currentChatId) {
+          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
             return {
               ...chat,
               messages: [
@@ -110,120 +85,138 @@ const ChatProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const currentChat = chats.find((chat) => chat.id === currentChatId);
+    const currentChat = currentChatId 
+      ? chats.find((chat) => String(chat.id) === String(currentChatId))
+      : chats[0];
 
     if (currentChat && !currentChat.buttonsWereShown && !currentChat.buttonsWereHidden) {
       fetchInitialMessages();
     }
   }, [currentChatId]);
 
-  const createNewChat = async () => {
-    const currentChat = chats.find((c) => c.id === currentChatId);
+  const createNewChat = () => {
+    const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
     if (!currentChat) return;
 
     if (currentChat.isEmpty) {
       return;
     }
 
-    const emptyChat = chats.find((c) => c.id !== currentChatId && c.isEmpty);
+    const emptyChat = chats.find((c) => String(c.id) !== String(currentChatId) && c.isEmpty);
     if (emptyChat) {
       setCurrentChatId(emptyChat.id);
       return;
     }
 
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/my`);
-      const backendChat = response.data;
-      
-      const newChat = createDefaultChat(backendChat);
-      setChats(prev => [...prev, newChat]);
-      setCurrentChatId(newChat.id);
-      
-      return newChat;
-    } catch (error) {
-      console.error('Error creating new chat:', error);
-    }
+    const newChat = createDefaultChat();
+    setChats((prev) => [...prev, newChat]);
+    setCurrentChatId(null);
   };
 
   const switchChat = (chatId) => {
-    if (chatId === currentChatId) {
+    if (String(chatId) === String(currentChatId)) {
       return;
     }
     setCurrentChatId(chatId);
   };
 
   async function createMessage(text, isFeedback = false) {
-    if (!currentChatId) {
-      return;
+    if (!text) return;
+
+    // Находим текущий чат до отправки запроса
+    const currentChat = chats.find(
+      (c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
+    );
+
+    console.log('Current chat state:', {
+      chatId: currentChat?.id,
+      currentChatId,
+      messages: currentChat?.messages,
+      allChats: chats
+  });
+
+    // Формируем параметры запроса
+    const params = {
+      prompt: text,
+      category_filter: categoryFilter || '',
+      locale,
+    };
+
+    // Если у чата уже есть ID, добавляем его в параметры
+    if (currentChat && currentChat.id) {
+      params.conversation_id = currentChat.id;
     }
 
-    setChats((prev) =>
-      prev.map((chat) => {
-        if (chat.id === currentChatId) {
-          return {
-            ...chat,
-            isEmpty: false,
-            showInitialButtons: false,
-            buttonsWereHidden: true,
-            messages: chat.messages.filter((message) => !message.isButton),
-          };
-        }
-        return chat;
-      })
-    );
-
-    setChats((prev) =>
-      prev.map((chat) => {
-        if (chat.id === currentChatId) {
-          return {
-            ...chat,
-            messages: [
-              ...chat.messages,
-              {
-                text,
-                isUser: true,
-                isFeedback,
-              },
-            ],
-          };
-        }
-        return chat;
-      })
-    );
+    console.log('Отправляемые параметры:', {
+      currentChatId,
+      params,
+      currentChat: currentChat?.id
+    });
 
     setIsTyping(true);
+
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/assistant/ask`,
-        null,
-        {
-          params: {
-            prompt: text,
-            category_filter: categoryFilter || undefined,
-            locale,
-            conversation_id: currentChatId,
-          },
-        }
-      );
-
-      const botMessage = {
-        text: res.data.content,
-        isUser: false,
-        isFeedback: false,
-      };
-
+      // Добавляем сообщение пользователя в чат
       setChats((prev) =>
         prev.map((chat) => {
-          if (chat.id === currentChatId) {
+          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
             return {
               ...chat,
-              messages: [...chat.messages, botMessage],
+              isEmpty: false,
+              showInitialButtons: false,
+              buttonsWereHidden: true,
+              messages: [
+                ...chat.messages.filter((message) => !message.isButton),
+                {
+                  text,
+                  isUser: true,
+                  isFeedback,
+                },
+              ],
             };
           }
           return chat;
         })
       );
 
+      // Отправляем запрос
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/assistant/ask`,
+        null,
+        { params }
+      );
+
+      const conversationId = res.data.conversation_id;
+      const conversationTitle = res.data.conversation_title;
+
+      // Обновляем ID текущего чата только если его еще нет
+      if (!currentChatId) {
+        setCurrentChatId(conversationId);
+      }
+
+      // Добавляем ответ бота
+      setChats((prev) =>
+        prev.map((chat) => {
+          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+            return {
+              ...chat,
+              id: chat.id || conversationId, // Сохраняем существующий ID или устанавливаем новый
+              title: chat.title || conversationTitle,
+              messages: [
+                ...chat.messages,
+                {
+                  text: res.data.content,
+                  isUser: false,
+                  isFeedback: false,
+                },
+              ],
+            };
+          }
+          return chat;
+        })
+      );
+
+      // Добавляем сообщение с запросом фидбека
       const feedbackMessage = {
         text: t('feedback.requestFeedback'),
         isUser: false,
@@ -232,7 +225,7 @@ const ChatProvider = ({ children }) => {
 
       setChats((prev) =>
         prev.map((chat) => {
-          if (chat.id === currentChatId) {
+          if (String(chat.id) === String(conversationId)) {
             return {
               ...chat,
               messages: [...chat.messages, feedbackMessage],
@@ -241,8 +234,16 @@ const ChatProvider = ({ children }) => {
           return chat;
         })
       );
+
     } catch (error) {
-      console.error(error);
+      console.error('Детали ошибки:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        params: error.config?.params,
+        url: error.config?.url
+      });
+      
       const errorMessage = {
         text: t('chatError.errorMessage'),
         isUser: false,
@@ -251,7 +252,7 @@ const ChatProvider = ({ children }) => {
 
       setChats((prev) =>
         prev.map((chat) => {
-          if (chat.id === currentChatId) {
+          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
             return {
               ...chat,
               messages: [...chat.messages, errorMessage],
@@ -268,7 +269,7 @@ const ChatProvider = ({ children }) => {
   const removeFeedbackMessage = () => {
     setChats((prevChats) =>
       prevChats.map((chat) => {
-        if (chat.id === currentChatId) {
+        if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prevChats[0])) {
           return {
             ...chat,
             messages: chat.messages.filter((message) => !message.isFeedback),
@@ -284,7 +285,7 @@ const ChatProvider = ({ children }) => {
 
     setChats((prev) =>
       prev.map((chat) => {
-        if (chat.id === currentChatId) {
+        if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
           return {
             ...chat,
             isEmpty: false,
@@ -298,19 +299,59 @@ const ChatProvider = ({ children }) => {
     );
   };
 
+  const getBotMessageIndex = (chatId) => {
+    const chat = chats.find(c => String(c.id) === String(chatId) || (c.id === null && c === chats[0]));
+    if (!chat) return 0;
+  
+    const messages = chat.messages;
+    let botCount = 0;
+  
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (!msg.isUser && !msg.isFeedback) {
+        botCount++;
+      }
+    }
+  
+    return botCount - 1;
+  };
+ 
+  const sendFeedback = async (rate, text) => {
+    try {
+      const currentChat = chats.find(c => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]));
+      if (!currentChat) throw new Error('Chat not found');
+
+      const botMessageIndex = getBotMessageIndex(currentChatId);
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/conversation/by-id/${currentChat.id}/add-feedback`,
+        {
+          message_index: botMessageIndex,
+          rate: rate,
+          text: text
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error sending feedback:', error);
+      throw error;
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
         chats,
         currentChatId,
         isTyping,
-        isLoading,
         createNewChat,
         switchChat,
         createMessage,
         handleButtonClick,
+        getBotMessageIndex,
+        sendFeedback,
         removeFeedbackMessage,
-        showInitialButtons: chats.find((c) => c.id === currentChatId)?.showInitialButtons || false,
+        showInitialButtons: chats.find((c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]))?.showInitialButtons || false,
         updateLocale,
       }}
     >

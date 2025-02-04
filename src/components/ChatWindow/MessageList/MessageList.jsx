@@ -13,8 +13,39 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
   const { chats, currentChatId, isTyping, handleButtonClick, showInitialButtons } =
     useContext(ChatContext);
 
-  const currentChat = chats.find((c) => c.id === currentChatId);
-  const messages = currentChat ? currentChat.messages : [];
+  // Изменяем логику поиска текущего чата
+  const currentChat = chats.find((c) => 
+    (currentChatId === null && c.id === null) || c.id === currentChatId
+  );
+  
+
+  // Получаем сообщения с проверкой
+  const messages = currentChat?.messages || [];
+
+  const getBotMessageIndex = (currentIndex) => {
+    if (!messages[currentIndex].isFeedback) {
+      return null;
+    }
+ 
+    let botCount = 0;
+    // Идем с начала до текущего индекса
+    for (let i = 0; i < currentIndex; i++) {
+      const msg = messages[i];
+      if (!msg.isUser && !msg.isFeedback) {
+        botCount++;
+      }
+    }
+   
+    // Находим последнее сообщение бота перед текущим фидбеком
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (!msg.isUser && !msg.isFeedback) {
+        return botCount - 1;
+      }
+    }
+   
+    return botCount - 1;
+  };
 
   const scrollTargetRef = useRef(null);
 
@@ -43,42 +74,43 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       )}
 
-<div className='overflow-y-auto message-list-wrap'>
-<div className="message-list justify-end flex flex-col">
-  {messages.map((message, index) => {
-    const isFirstMessage = index === 0;
+      <div className='overflow-y-auto message-list-wrap'>
+        <div className="message-list justify-end flex flex-col">
+          {messages.map((message, index) => {
+            const isFirstMessage = index === 0;
+            const botMessageIndex = getBotMessageIndex(index);
 
-    return (
-      <React.Fragment key={index}>
-        {/* Рендерим сообщение */}
-        {message.isFeedback ? (
-          <FeedbackMessage text={message.text} />
-        ) : (
-          <Message
-            text={message.text}
-            isUser={message.isUser}
-            isButton={showInitialButtons && message.isButton} // Показываем кнопки, если они активны
-            onClick={() => handleButtonClick(message.text)} // Обработчик клика
-          />
-        )}
 
-        {/* Рендерим suggestion-text только после первого сообщения */}
-        {isFirstMessage && showInitialButtons && (
-          <div className="suggestion-text mt-4">
-            {t('chat.suggestionText')}
-          </div>
-        )}
-      </React.Fragment>
-    );
-  })}
+            return (
+              <React.Fragment key={index}>
+                {message.isFeedback ? (
+                  <FeedbackMessage 
+                    text={message.text} 
+                    messageIndex={botMessageIndex}
+                  />
+                ) : (
+                  <Message
+                    text={message.text}
+                    isUser={message.isUser}
+                    messageIndex={botMessageIndex}
+                    isButton={showInitialButtons && message.isButton}
+                    onClick={() => handleButtonClick(message.text)}
+                  />
+                )}
 
-  {/* Рендерим индикатор печати */}
-  {isTyping && <TypingIndicator text={t('chatTyping.typingMessage')} />}
+                {isFirstMessage && showInitialButtons && (
+                  <div className="suggestion-text mt-4">
+                    {t('chat.suggestionText')}
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
 
-  {/* Скроллим вниз при добавлении новых сообщений */}
-  <div ref={scrollTargetRef}></div>
-</div>
-</div>
+          {isTyping && <TypingIndicator text={t('chatTyping.typingMessage')} />}
+          <div ref={scrollTargetRef}></div>
+        </div>
+      </div>
     </div>
   );
 }
