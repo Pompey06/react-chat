@@ -1,5 +1,6 @@
-import React, { useState, useContext } from 'react'; // Добавляем useContext
-import { ChatContext } from '../../../context/ChatContext'; // Импортируем ChatContext
+// FeedbackMessage.jsx
+import React, { useState, useContext, useCallback } from 'react';
+import { ChatContext } from '../../../context/ChatContext';
 import Modal from '../Modal/Modal';
 import './Feedbackmessage.css';
 import badIcon from '../../../assets/bad.svg';
@@ -10,23 +11,34 @@ import { useTranslation } from 'react-i18next';
 
 export default function FeedbackMessage({ messageIndex }) {
   const { t } = useTranslation();
-  const { removeFeedbackMessage } = useContext(ChatContext); // Подключаем функцию из контекста
+  const { removeFeedbackMessage, sendFeedback } = useContext(ChatContext);
   const [modalType, setModalType] = useState(null);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
 
   const openModal = (type) => {
+    setSelectedMessageIndex(messageIndex);
     setModalType(type);
   };
 
   const closeModal = () => {
     setModalType(null);
+    setSelectedMessageIndex(null);
   };
+
+  const handleFeedbackSubmit = useCallback(async (text) => {
+    try {
+      await sendFeedback(modalType, text, messageIndex);
+      closeModal();
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
+  }, [sendFeedback, modalType, messageIndex, closeModal]);
 
   return (
     <div className="feedback-message message mb-8 bg-white flex font-light flex-col items-start">
       <p className="text-black mb-6">{t('feedback.requestFeedback')}</p>
       <div className="flex gap-6 feedback-message__btns">
-        {/* Кнопка "Хорошо" */}
         <button
           className="feedback-button flex gap-5 font-light bg-transparent text-black hover:text-white transition-colors duration-300"
           onMouseEnter={() => setHoveredButton('good')}
@@ -48,7 +60,6 @@ export default function FeedbackMessage({ messageIndex }) {
           {t('feedback.good')}
         </button>
 
-        {/* Кнопка "Плохо" */}
         <button
           className="feedback-button flex gap-5 font-light bg-transparent text-black hover:text-white transition-colors duration-300"
           onMouseEnter={() => setHoveredButton('bad')}
@@ -71,26 +82,24 @@ export default function FeedbackMessage({ messageIndex }) {
         </button>
       </div>
 
-      {/* Модалка для "Хорошо" */}
       <Modal
         isOpen={modalType === 'good'}
         onClose={closeModal}
         title={t('feedback.goodModalTitle')}
         description={t('feedback.goodModalDescription')}
-        onSubmit={removeFeedbackMessage}
+        onSubmit={handleFeedbackSubmit}
         feedbackType="good"
-        messageIndex={messageIndex}
+        messageIndex={selectedMessageIndex}
       />
 
-      {/* Модалка для "Плохо" */}
       <Modal
         isOpen={modalType === 'bad'}
         onClose={closeModal}
         title={t('feedback.badModalTitle')}
         description={t('feedback.badModalDescription')}
-        onSubmit={removeFeedbackMessage}
+        onSubmit={handleFeedbackSubmit}
         feedbackType="bad"
-        messageIndex={messageIndex}
+        messageIndex={selectedMessageIndex}
       />
     </div>
   );

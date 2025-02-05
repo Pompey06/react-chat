@@ -121,164 +121,120 @@ const ChatProvider = ({ children }) => {
   };
 
   async function createMessage(text, isFeedback = false) {
-    if (!text) return;
+   if (!text) return;
+ 
+   const currentChat = chats.find(
+     (c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
+   );
+ 
+   const params = {
+     prompt: text,
+     category_filter: categoryFilter || '',
+     locale,
+   };
+ 
+   if (currentChat && currentChat.id) {
+     params.conversation_id = currentChat.id;
+   }
+ 
+   setIsTyping(true);
+ 
+   try {
+     // Добавляем сообщение пользователя в чат
+     setChats((prev) =>
+       prev.map((chat) => {
+         if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+           return {
+             ...chat,
+             isEmpty: false,
+             showInitialButtons: false,
+             buttonsWereHidden: true,
+             messages: [
+               ...chat.messages.filter((message) => !message.isButton),
+               {
+                 text,
+                 isUser: true,
+                 isFeedback,
+               },
+             ],
+           };
+         }
+         return chat;
+       })
+     );
+ 
+     // Отправляем запрос
+     const res = await axios.post(
+       `${import.meta.env.VITE_API_URL}/assistant/ask`,
+       null,
+       { params }
+     );
+ 
+     const conversationId = res.data.conversation_id;
+     const conversationTitle = res.data.conversation_title;
+ 
+     if (!currentChatId) {
+       setCurrentChatId(conversationId);
+     }
+ 
+     // Добавляем ответ бота и сообщение с запросом фидбека в одном обновлении
+     setChats((prev) =>
+       prev.map((chat) => {
+         if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+           return {
+             ...chat,
+             id: chat.id || conversationId,
+             title: chat.title || conversationTitle,
+             messages: [
+               ...chat.messages,
+               {
+                 text: res.data.content,
+                 isUser: false,
+                 isFeedback: false,
+               },
+               {
+                 text: t('feedback.requestFeedback'),
+                 isUser: false,
+                 isFeedback: true,
+               }
+             ],
+           };
+         }
+         return chat;
+       })
+     );
+ 
+   } catch (error) {
+     console.error('Детали ошибки:', {
+       status: error.response?.status,
+       statusText: error.response?.statusText,
+       data: error.response?.data,
+       params: error.config?.params,
+       url: error.config?.url
+     });
+     
+     const errorMessage = {
+       text: t('chatError.errorMessage'),
+       isUser: false,
+       isFeedback,
+     };
+ 
+     setChats((prev) =>
+       prev.map((chat) => {
+         if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+           return {
+             ...chat,
+             messages: [...chat.messages, errorMessage],
+           };
+         }
+         return chat;
+       })
+     );
+   } finally {
+     setIsTyping(false);
+   }
+ }
 
-    // Находим текущий чат до отправки запроса
-    const currentChat = chats.find(
-      (c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
-    );
-
-    console.log('Current chat state:', {
-      chatId: currentChat?.id,
-      currentChatId,
-      messages: currentChat?.messages,
-      allChats: chats
-  });
-
-    // Формируем параметры запроса
-    const params = {
-      prompt: text,
-      category_filter: categoryFilter || '',
-      locale,
-    };
-
-    // Если у чата уже есть ID, добавляем его в параметры
-    if (currentChat && currentChat.id) {
-      params.conversation_id = currentChat.id;
-    }
-
-    console.log('Отправляемые параметры:', {
-      currentChatId,
-      params,
-      currentChat: currentChat?.id
-    });
-
-    setIsTyping(true);
-
-    try {
-      // Добавляем сообщение пользователя в чат
-      setChats((prev) =>
-        prev.map((chat) => {
-          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-            return {
-              ...chat,
-              isEmpty: false,
-              showInitialButtons: false,
-              buttonsWereHidden: true,
-              messages: [
-                ...chat.messages.filter((message) => !message.isButton),
-                {
-                  text,
-                  isUser: true,
-                  isFeedback,
-                },
-              ],
-            };
-          }
-          return chat;
-        })
-      );
-
-      // Отправляем запрос
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/assistant/ask`,
-        null,
-        { params }
-      );
-
-      const conversationId = res.data.conversation_id;
-      const conversationTitle = res.data.conversation_title;
-
-      // Обновляем ID текущего чата только если его еще нет
-      if (!currentChatId) {
-        setCurrentChatId(conversationId);
-      }
-
-      // Добавляем ответ бота
-      setChats((prev) =>
-        prev.map((chat) => {
-          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-            return {
-              ...chat,
-              id: chat.id || conversationId, // Сохраняем существующий ID или устанавливаем новый
-              title: chat.title || conversationTitle,
-              messages: [
-                ...chat.messages,
-                {
-                  text: res.data.content,
-                  isUser: false,
-                  isFeedback: false,
-                },
-              ],
-            };
-          }
-          return chat;
-        })
-      );
-
-      // Добавляем сообщение с запросом фидбека
-      const feedbackMessage = {
-        text: t('feedback.requestFeedback'),
-        isUser: false,
-        isFeedback: true,
-      };
-
-      setChats((prev) =>
-        prev.map((chat) => {
-          if (String(chat.id) === String(conversationId)) {
-            return {
-              ...chat,
-              messages: [...chat.messages, feedbackMessage],
-            };
-          }
-          return chat;
-        })
-      );
-
-    } catch (error) {
-      console.error('Детали ошибки:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        params: error.config?.params,
-        url: error.config?.url
-      });
-      
-      const errorMessage = {
-        text: t('chatError.errorMessage'),
-        isUser: false,
-        isFeedback,
-      };
-
-      setChats((prev) =>
-        prev.map((chat) => {
-          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-            return {
-              ...chat,
-              messages: [...chat.messages, errorMessage],
-            };
-          }
-          return chat;
-        })
-      );
-    } finally {
-      setIsTyping(false);
-    }
-  }
-
-  const removeFeedbackMessage = () => {
-    setChats((prevChats) =>
-      prevChats.map((chat) => {
-        if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prevChats[0])) {
-          return {
-            ...chat,
-            messages: chat.messages.filter((message) => !message.isFeedback),
-          };
-        }
-        return chat;
-      })
-    );
-  };
 
   const handleButtonClick = (value) => {
     setCategoryFilter(value);
@@ -299,44 +255,83 @@ const ChatProvider = ({ children }) => {
     );
   };
 
-  const getBotMessageIndex = (chatId) => {
-    const chat = chats.find(c => String(c.id) === String(chatId) || (c.id === null && c === chats[0]));
-    if (!chat) return 0;
-  
-    const messages = chat.messages;
-    let botCount = 0;
-  
-    for (let i = 0; i < messages.length; i++) {
-      const msg = messages[i];
-      if (!msg.isUser && !msg.isFeedback) {
-        botCount++;
+
+const removeFeedbackMessage = (messageIndex) => {
+  setChats(prevChats => 
+    prevChats.map(chat => {
+      if (chat.id === currentChatId || (chat.id === null && currentChatId === null)) {
+        return {
+          ...chat,
+          messages: chat.messages.filter((msg, index) => {
+            // Если это сообщение фидбека для конкретного индекса - удаляем его
+            if (msg.isFeedback) {
+              const botMessageIndex = getBotMessageIndex(index, chat.messages);
+              return botMessageIndex !== messageIndex;
+            }
+            return true;
+          })
+        };
       }
-    }
-  
-    return botCount - 1;
-  };
- 
-  const sendFeedback = async (rate, text) => {
-    try {
-      const currentChat = chats.find(c => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]));
-      if (!currentChat) throw new Error('Chat not found');
+      return chat;
+    })
+  );
+};
 
-      const botMessageIndex = getBotMessageIndex(currentChatId);
+const getBotMessageIndex = (currentIndex) => {
+   const currentChat = chats.find(c => 
+     String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
+   );
+   
+   if (!currentChat) return null;
+   
+   const messages = currentChat.messages;
+   
+   if (!messages[currentIndex]?.isFeedback) {
+     return null;
+   }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/conversation/by-id/${currentChat.id}/add-feedback`,
-        {
-          message_index: botMessageIndex,
-          rate: rate,
-          text: text
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error sending feedback:', error);
-      throw error;
-    }
-  };
+   // Пропускаем первое приветственное сообщение
+   let messageCount = -1; // Начинаем с -1, чтобы первая пара начиналась с 0
+   
+   for (let i = 1; i < currentIndex; i++) { // Начинаем с 1, пропуская приветствие
+     const message = messages[i];
+     
+     // Пропускаем фидбек сообщения
+     if (message.isFeedback) {
+       continue;
+     }
+     
+     messageCount++;
+   }
+
+   // Возвращаем индекс бота (каждый второй индекс)
+   return Math.floor(messageCount / 2) * 2 + 1;
+};
+
+// Измените функцию sendFeedback
+const sendFeedback = async (rate, text, messageIndex) => {
+  try {
+    const currentChat = chats.find(c => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]));
+    if (!currentChat) throw new Error('Chat not found');
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/conversation/by-id/${currentChat.id}/add-feedback`,
+      {
+        message_index: messageIndex,
+        rate: rate,
+        text: text
+      }
+    );
+
+    // Передаём индекс сообщения
+    removeFeedbackMessage(messageIndex);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error sending feedback:', error);
+    throw error;
+  }
+};
 
   return (
     <ChatContext.Provider
@@ -348,11 +343,12 @@ const ChatProvider = ({ children }) => {
         switchChat,
         createMessage,
         handleButtonClick,
-        getBotMessageIndex,
         sendFeedback,
+        getBotMessageIndex,
         removeFeedbackMessage,
         showInitialButtons: chats.find((c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]))?.showInitialButtons || false,
         updateLocale,
+
       }}
     >
       {children}

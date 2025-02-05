@@ -10,7 +10,7 @@ import TypingIndicator from '../TypingIndicator/TypingIndicator';
 
 export default function MessageList({ isSidebarOpen, toggleSidebar }) {
   const { t } = useTranslation();
-  const { chats, currentChatId, isTyping, handleButtonClick, showInitialButtons } =
+  const { chats, currentChatId, getBotMessageIndex, isTyping, handleButtonClick, showInitialButtons } =
     useContext(ChatContext);
 
   // Изменяем логику поиска текущего чата
@@ -22,30 +22,7 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
   // Получаем сообщения с проверкой
   const messages = currentChat?.messages || [];
 
-  const getBotMessageIndex = (currentIndex) => {
-    if (!messages[currentIndex].isFeedback) {
-      return null;
-    }
- 
-    let botCount = 0;
-    // Идем с начала до текущего индекса
-    for (let i = 0; i < currentIndex; i++) {
-      const msg = messages[i];
-      if (!msg.isUser && !msg.isFeedback) {
-        botCount++;
-      }
-    }
-   
-    // Находим последнее сообщение бота перед текущим фидбеком
-    for (let i = currentIndex - 1; i >= 0; i--) {
-      const msg = messages[i];
-      if (!msg.isUser && !msg.isFeedback) {
-        return botCount - 1;
-      }
-    }
-   
-    return botCount - 1;
-  };
+
 
   const scrollTargetRef = useRef(null);
 
