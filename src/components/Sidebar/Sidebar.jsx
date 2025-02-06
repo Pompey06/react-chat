@@ -35,51 +35,52 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
   };
 
   return (
-    <div
-      className={`sidebar overflow-y-auto flex xl:p-8 flex-col bg-blue ${
-        isSidebarOpen
-          ? 'sidebar--close p-8 '
-          : 'xl:min-w-96 p-3 py-[32px] min-w-[248px]'
-      }`}
-    >
-      <img
-        onClick={toggleSidebar}
-        src={burger}
-        className="sidebar__icon self-end cursor-pointer"
-        alt={t('sidebar.close')}
-      />
-
-      {(isMobile ? isSidebarOpen : !isSidebarOpen) && (
-        <div className="sidebar__buttons flex justify-start flex-col gap-2.5 mt-16">
-          {[
-            {
-              id: 'new-chat',
-              text: t('sidebar.newChat'),
-              icon: <img src={newChat} alt={t('sidebar.newChat')} className="w-5 h-5" />,
-              onClick: handleNewChat,
-              className: "bg-white"
-            },
-            ...chats.slice().reverse().map((chat, index) => ({
-              id: chat.id,
-              text: chat.title || t('sidebar.newChat'),
-              icon: <img src={previousChat} alt={t('sidebar.previousRequest')} className="w-5 h-5" />,
-              onClick: () => handleSwitchChat(chat.id),
-
-              className: `py-2 px-4 rounded-md ${
-                chat.id === currentChatId ? 'bg-gray-300 text-black' : 'bg-white text-gray-600'
-              }`
-            }))
-          ].map((button) => (
-            <SidebarButton
-              key={button.id}
-              text={button.text}
-              icon={button.icon}
-              onClick={button.onClick}
-              className={button.className}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+   <div
+     className={`sidebar overflow-hidden flex xl:p-8 flex-col bg-blue ${
+       isSidebarOpen
+         ? 'sidebar--close p-8'
+         : 'xl:min-w-96 p-3 py-[32px] min-w-[248px]'
+     }`}
+   >
+     <img
+       onClick={toggleSidebar}
+       src={burger}
+       className="sidebar__icon self-end cursor-pointer"
+       alt={t('sidebar.close')}
+     />
+ 
+     {/* Убираем условие рендеринга, теперь управляем через CSS */}
+     <div className="sidebar__buttons flex justify-start flex-col gap-2.5 mt-16">
+       {[
+         {
+           id: 'new-chat',
+           text: t('sidebar.newChat'),
+           icon: <img src={newChat} alt={t('sidebar.newChat')} className="w-5 h-5" />,
+           onClick: handleNewChat,
+           className: "bg-white"
+         },
+         ...chats
+           .slice()
+           .reverse()
+           .map((chat, index) => ({
+             id: chat.id,
+             text: chat.title || t('sidebar.newChat'),
+             icon: <img src={previousChat} alt={t('sidebar.previousRequest')} className="w-5 h-5" />,
+             onClick: () => handleSwitchChat(chat.id),
+             className: `py-2 px-4 rounded-md ${
+               chat.id === currentChatId ? 'bg-gray-300 text-black' : 'bg-white text-gray-600'
+             }`
+           }))
+       ].map((button) => (
+         <SidebarButton
+           key={button.id}
+           text={button.text}
+           icon={button.icon}
+           onClick={button.onClick}
+           className={button.className}
+         />
+       ))}
+     </div>
+   </div>
+ );
 }
