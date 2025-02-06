@@ -8,13 +8,19 @@ import badIconHover from '../../../assets/bad-white.svg';
 import goodIcon from '../../../assets/good.svg';
 import goodIconHover from '../../../assets/good-white.svg';
 import { useTranslation } from 'react-i18next';
+import { hasFeedback } from '../../../utils/feedbackStorage';
 
 export default function FeedbackMessage({ messageIndex }) {
+   const { currentChatId } = useContext(ChatContext);
   const { t } = useTranslation();
   const { removeFeedbackMessage, sendFeedback } = useContext(ChatContext);
   const [modalType, setModalType] = useState(null);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
+
+  if (hasFeedback(currentChatId, messageIndex)) {
+   return null;
+ }
 
   const openModal = (type) => {
     setSelectedMessageIndex(messageIndex);

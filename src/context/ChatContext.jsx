@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { hasFeedback, saveFeedbackState } from '../utils/feedbackStorage';
 
 const ChatContext = createContext();
 
@@ -54,73 +55,209 @@ const ChatProvider = ({ children }) => {
     i18n.changeLanguage(lang);
   };
 
-  const fetchInitialMessages = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/assistant/category-filters`);
-      const messages = res.data;
+  const fetchChatHistory = async (chatId) => {
+   try {
+     const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/by-id/${chatId}`);
+     
+     const formattedMessages = response.data.messages.map(message => ({
+       text: message.text,
+       isUser: message.type === "user",
+       isFeedback: false,
+       isButton: false
+     }));
+ 
+     const messagesWithFeedback = [];
+     formattedMessages.forEach((message, index) => {
+       messagesWithFeedback.push(message);
+       
+       // Добавляем фидбек только если:
+       // 1. Сообщение от ассистента
+       // 2. Фидбек ещё не был отправлен
+       if (!message.isUser && !hasFeedback(chatId, index)) {
+         messagesWithFeedback.push({
+           text: t('feedback.requestFeedback'),
+           isUser: false,
+           isFeedback: true,
+           isButton: false
+         });
+       }
+     });
+ 
+     return {
+       ...response.data,
+       messages: messagesWithFeedback
+     };
+   } catch (error) {
+     console.error('Error fetching chat history:', error);
+     throw error;
+   }
+ };
+ 
+ const fetchMyChats = async () => {
+   try {
+     const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversation/my`);
+     return response.data;
+   } catch (error) {
+     console.error('Error fetching my chats:', error);
+     throw error;
+   }
+ };
 
-      setChats((prev) =>
-        prev.map((chat) => {
-          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-            return {
-              ...chat,
-              messages: [
-                ...chat.messages,
-                ...messages.map((text) => ({
-                  text,
-                  isUser: true,
-                  isFeedback: false,
-                  isButton: true,
-                })),
-              ],
-              buttonsWereShown: true,
-            };
-          }
-          return chat;
-        })
-      );
-    } catch (error) {
-      console.error('Ошибка при загрузке начальных сообщений:', error);
-    }
-  };
+ useEffect(() => {
+   const loadExistingChats = async () => {
+     try {
+       const myChats = await fetchMyChats();
+       setChats(prevChats => {
+         // Оставляем текущий дефолтный чат и добавляем существующие
+         const defaultChat = prevChats.find(chat => chat.id === null);
+         return [
+           defaultChat,
+           ...myChats.map(chat => ({
+             ...createDefaultChat(),
+             id: chat.id,
+             title: chat.title,
+             isEmpty: false,
+           }))
+         ];
+       });
+     } catch (error) {
+       console.error('Error loading existing chats:', error);
+     }
+   };
+ 
+   loadExistingChats();
+ }, []);
 
-  useEffect(() => {
-    const currentChat = currentChatId 
-      ? chats.find((chat) => String(chat.id) === String(currentChatId))
-      : chats[0];
+ const fetchInitialMessages = async () => {
+   try {
+     const res = await axios.get(`${import.meta.env.VITE_API_URL}/assistant/category-filters`);
+     const messages = res.data;
+ 
+     setChats((prev) =>
+       prev.map((chat) => {
+         if (chat.isEmpty && (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))) {
+           return {
+             ...chat,
+             messages: [
+               chat.messages[0], // Сохраняем приветственное сообщение
+               ...messages.map((text) => ({
+                 text,
+                 isUser: true,
+                 isFeedback: false,
+                 isButton: true,
+               })),
+             ],
+             buttonsWereShown: true,
+           };
+         }
+         return chat;
+       })
+     );
+   } catch (error) {
+     console.error('Ошибка при загрузке начальных сообщений:', error);
+   }
+ };
+ 
+ // Обновляем useEffect для отслеживания переключения чатов
+ useEffect(() => {
+   const currentChat = chats.find((c) => 
+     String(c.id) === String(currentChatId) || (c.id === null && currentChatId === null)
+   );
+ 
+   // Загружаем кнопки только если чат пустой и кнопки ещё не были загружены
+   if (currentChat?.isEmpty && !currentChat.buttonsWereShown) {
+     fetchInitialMessages();
+   }
+ }, [currentChatId]);
 
-    if (currentChat && !currentChat.buttonsWereShown && !currentChat.buttonsWereHidden) {
-      fetchInitialMessages();
-    }
-  }, [currentChatId]);
+ const createNewChat = () => {
+   // Находим текущий чат
+   const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
+   
+   // Если мы в пустом чате - перезагружаем его состояние
+   if (currentChat?.isEmpty) {
+     setChats(prev => 
+       prev.map(chat => {
+         if (chat.isEmpty) {
+           return {
+             ...createDefaultChat(),
+             id: null,
+             isEmpty: true,
+             buttonsWereShown: false,
+           };
+         }
+         return chat;
+       })
+     );
+     fetchInitialMessages(); // Добавляем явный вызов
+     return;
+   }
+ 
+   // Находим существующий пустой чат
+   const emptyChat = chats.find((c) => c.isEmpty);
+ 
+   // Если есть пустой чат - переключаемся на него и перезагружаем кнопки
+   if (emptyChat) {
+     setCurrentChatId(null);
+     setChats(prev => 
+       prev.map(chat => {
+         if (chat.isEmpty) {
+           return {
+             ...createDefaultChat(),
+             id: null,
+             isEmpty: true,
+             buttonsWereShown: false,
+           };
+         }
+         return chat;
+       })
+     );
+     fetchInitialMessages(); // Добавляем явный вызов
+     return;
+   }
+ 
+   // Если нет пустого чата - создаём новый
+   const newChat = createDefaultChat();
+   setChats(prev => [...prev, newChat]);
+   setCurrentChatId(null);
+   fetchInitialMessages(); // Добавляем явный вызов
+ };
 
-  const createNewChat = () => {
-    const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
-    if (!currentChat) return;
+ const switchChat = async (chatId) => {
+   if (String(chatId) === String(currentChatId)) {
+     return;
+   }
+ 
+   try {
+     if (chatId !== null) {
+       const chatHistory = await fetchChatHistory(chatId);
+       
+       setChats(prevChats => prevChats.map(chat => {
+         if (String(chat.id) === String(chatId)) {
+           return {
+             ...chat,
+             messages: [
+               // Сохраняем приветственное сообщение
+               chat.messages[0],
+               ...chatHistory.messages
+             ],
+             title: chatHistory.title,
+             isEmpty: false,
+             showInitialButtons: false,
+             buttonsWereHidden: true
+           };
+         }
+         return chat;
+       }));
+     }
+     
+     setCurrentChatId(chatId);
+   } catch (error) {
+     console.error('Error switching chat:', error);
+   }
+ };
 
-    if (currentChat.isEmpty) {
-      return;
-    }
-
-    const emptyChat = chats.find((c) => String(c.id) !== String(currentChatId) && c.isEmpty);
-    if (emptyChat) {
-      setCurrentChatId(emptyChat.id);
-      return;
-    }
-
-    const newChat = createDefaultChat();
-    setChats((prev) => [...prev, newChat]);
-    setCurrentChatId(null);
-  };
-
-  const switchChat = (chatId) => {
-    if (String(chatId) === String(currentChatId)) {
-      return;
-    }
-    setCurrentChatId(chatId);
-  };
-
-  async function createMessage(text, isFeedback = false) {
+ async function createMessage(text, isFeedback = false) {
    if (!text) return;
  
    const currentChat = chats.find(
@@ -140,15 +277,12 @@ const ChatProvider = ({ children }) => {
    setIsTyping(true);
  
    try {
-     // Добавляем сообщение пользователя в чат
+     // Добавляем сообщение пользователя
      setChats((prev) =>
        prev.map((chat) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
            return {
              ...chat,
-             isEmpty: false,
-             showInitialButtons: false,
-             buttonsWereHidden: true,
              messages: [
                ...chat.messages.filter((message) => !message.isButton),
                {
@@ -173,31 +307,44 @@ const ChatProvider = ({ children }) => {
      const conversationId = res.data.conversation_id;
      const conversationTitle = res.data.conversation_title;
  
+     // Если это первое сообщение в чате
      if (!currentChatId) {
        setCurrentChatId(conversationId);
      }
  
-     // Добавляем ответ бота и сообщение с запросом фидбека в одном обновлении
+     // Добавляем ответ бота и обновляем информацию о чате
      setChats((prev) =>
        prev.map((chat) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+           const chatId = chat.id || conversationId;
+           const newBotMessageIndex = chat.messages.length + 1; // +1 потому что мы уже добавили сообщение пользователя
+ 
+           const messages = [
+             ...chat.messages,
+             {
+               text: res.data.content,
+               isUser: false,
+               isFeedback: false,
+             }
+           ];
+ 
+           // Добавляем фидбек только если он ещё не был отправлен
+           if (!hasFeedback(chatId, newBotMessageIndex)) {
+             messages.push({
+               text: t('feedback.requestFeedback'),
+               isUser: false,
+               isFeedback: true,
+             });
+           }
+ 
            return {
              ...chat,
-             id: chat.id || conversationId,
+             id: chatId,
              title: chat.title || conversationTitle,
-             messages: [
-               ...chat.messages,
-               {
-                 text: res.data.content,
-                 isUser: false,
-                 isFeedback: false,
-               },
-               {
-                 text: t('feedback.requestFeedback'),
-                 isUser: false,
-                 isFeedback: true,
-               }
-             ],
+             isEmpty: false,
+             showInitialButtons: false,
+             buttonsWereHidden: true,
+             messages,
            };
          }
          return chat;
@@ -212,7 +359,7 @@ const ChatProvider = ({ children }) => {
        params: error.config?.params,
        url: error.config?.url
      });
-     
+    
      const errorMessage = {
        text: t('chatError.errorMessage'),
        isUser: false,
@@ -235,25 +382,26 @@ const ChatProvider = ({ children }) => {
    }
  }
 
-
-  const handleButtonClick = (value) => {
-    setCategoryFilter(value);
-
-    setChats((prev) =>
-      prev.map((chat) => {
-        if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-          return {
-            ...chat,
-            isEmpty: false,
-            showInitialButtons: false,
-            buttonsWereHidden: true,
-            messages: chat.messages.filter((message) => !message.isButton),
-          };
-        }
-        return chat;
-      })
-    );
-  };
+ const handleButtonClick = (value) => {
+   setCategoryFilter(value);
+ 
+   setChats((prev) =>
+     prev.map((chat) => {
+       if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+         return {
+           ...chat,
+           showInitialButtons: false,
+           buttonsWereHidden: true,
+           messages: [
+             chat.messages[0], // Сохраняем приветственное сообщение
+             ...chat.messages.slice(1).filter((message) => !message.isButton), // Удаляем кнопки
+           ],
+         };
+       }
+       return chat;
+     })
+   );
+ };
 
 
 const removeFeedbackMessage = (messageIndex) => {
@@ -308,30 +456,34 @@ const getBotMessageIndex = (currentIndex) => {
    return Math.floor(messageCount / 2) * 2 + 1;
 };
 
-// Измените функцию sendFeedback
 const sendFeedback = async (rate, text, messageIndex) => {
-  try {
-    const currentChat = chats.find(c => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]));
-    if (!currentChat) throw new Error('Chat not found');
-
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/conversation/by-id/${currentChat.id}/add-feedback`,
-      {
-        message_index: messageIndex,
-        rate: rate,
-        text: text
-      }
-    );
-
-    // Передаём индекс сообщения
-    removeFeedbackMessage(messageIndex);
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error sending feedback:', error);
-    throw error;
-  }
-};
+   try {
+     const currentChat = chats.find(c => 
+       String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
+     );
+     if (!currentChat) throw new Error('Chat not found');
+ 
+     const response = await axios.post(
+       `${import.meta.env.VITE_API_URL}/conversation/by-id/${currentChat.id}/add-feedback`,
+       {
+         message_index: messageIndex,
+         rate: rate,
+         text: text
+       }
+     );
+ 
+     // Сохраняем информацию об отправленном фидбеке
+     saveFeedbackState(currentChat.id, messageIndex);
+ 
+     // Удаляем сообщение с фидбеком из чата
+     removeFeedbackMessage(messageIndex);
+     
+     return response.data;
+   } catch (error) {
+     console.error('Error sending feedback:', error);
+     throw error;
+   }
+ };
 
   return (
     <ChatContext.Provider
