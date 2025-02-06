@@ -38,14 +38,14 @@ body {
 
 @media (max-width:1024px) {
    .message-list-wrap {
-      max-height: calc(100vh - 160px) !important;
+      max-height: calc(100vh - 215px) !important;
    }
    .message-list {
       
-      min-height: calc(100vh - 160px) !important;
+      min-height: calc(100vh - 215px) !important;
     }
     .sidebar {
-      max-height: calc(100vh + 20px) !important;
+      max-height: calc(100vh - 35px) !important;
 }
 }
 
