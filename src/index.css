@@ -33,7 +33,7 @@ body {
 }
 
 .sidebar {
-      max-height: calc(100vh - 40px) !important;
+      max-height: calc(100vh - 61px) !important;
 }
 
 @media (max-width:1024px) {

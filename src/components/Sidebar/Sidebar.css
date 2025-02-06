@@ -1,11 +1,10 @@
 .sidebar {
    border-radius: 10px;
-   transition: all 0.3s ease-in-out;
-   width: 384px; /* или xl:min-w-96 в пикселях */
-   overflow-y: auto; /* Добавляем вертикальную прокрутку */
+   transition: all 0.4s ease-in-out;
+   width: 384px;
+   overflow-y: auto;
  }
- 
- /* Стилизация скроллбара (опционально) */
+
  .sidebar::-webkit-scrollbar {
    width: 6px;
  }
@@ -19,12 +18,27 @@
    border-radius: 3px;
  }
  
- /* Остальные стили остаются без изменений */
  .sidebar--close {
    width: 116px;
    min-width: 116px !important;
+   overflow: hidden; /* Запрещаем скролл в закрытом состоянии */
  }
+
+@media (max-width: 1024px) {
+   .sidebar--close .sidebar__icon {
+      align-self: center;
+    }
+}
+
+@media (max-width: 700px) {
+   .sidebar--close .sidebar__icon {
+      align-self: flex-end;
+    }
+}
+
+
  
+ /* Остальные стили остаются без изменений */
  .sidebar__icon {
    max-width: 60px;
    cursor: pointer;
@@ -32,13 +46,13 @@
  
  .sidebar__buttons {
    opacity: 1;
-   transition: opacity 0.2s ease-in-out;
+   transition: opacity 0.3s ease-in-out;
  }
  
  .sidebar--close .sidebar__buttons {
    opacity: 0;
    visibility: hidden;
-   transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+   transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
  }
  
  .sidebar__button_active {
@@ -61,12 +75,13 @@
      background-color: #1e3a8a;
      z-index: 50;
      transform: translateX(-100%);
-     transition: transform 0.3s ease-in-out;
+     transition: transform 0.4s ease-in-out;
    }
  
    .sidebar--close {
      transform: translateX(0);
      width: 100%;
+     overflow-y: auto; /* Возвращаем скролл для мобильной версии в закрытом состоянии */
    }
  
    .sidebar--close .sidebar__buttons {
