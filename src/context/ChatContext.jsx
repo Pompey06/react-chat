@@ -103,6 +103,27 @@ const ChatProvider = ({ children }) => {
    }
  };
 
+ const updateChatsList = async () => {
+   try {
+     const myChats = await fetchMyChats();
+     setChats(prevChats => {
+       const defaultChat = prevChats.find(chat => chat.id === null);
+       return [
+         defaultChat,
+         ...myChats.map(chat => ({
+           ...createDefaultChat(),
+           id: chat.id,
+           title: chat.title,
+           isEmpty: false,
+         }))
+       ];
+     });
+   } catch (error) {
+     console.error('Error updating chats:', error);
+   }
+ };
+ 
+
  useEffect(() => {
    const loadExistingChats = async () => {
      try {
@@ -277,7 +298,6 @@ const ChatProvider = ({ children }) => {
    setIsTyping(true);
  
    try {
-     // Добавляем сообщение пользователя
      setChats((prev) =>
        prev.map((chat) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
@@ -297,7 +317,6 @@ const ChatProvider = ({ children }) => {
        })
      );
  
-     // Отправляем запрос
      const res = await axios.post(
        `${import.meta.env.VITE_API_URL}/assistant/ask`,
        null,
@@ -307,17 +326,17 @@ const ChatProvider = ({ children }) => {
      const conversationId = res.data.conversation_id;
      const conversationTitle = res.data.conversation_title;
  
-     // Если это первое сообщение в чате
      if (!currentChatId) {
        setCurrentChatId(conversationId);
+       // Обновляем список чатов после создания нового
+       await updateChatsList();
      }
  
-     // Добавляем ответ бота и обновляем информацию о чате
      setChats((prev) =>
        prev.map((chat) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
            const chatId = chat.id || conversationId;
-           const newBotMessageIndex = chat.messages.length + 1; // +1 потому что мы уже добавили сообщение пользователя
+           const newBotMessageIndex = chat.messages.length + 1;
  
            const messages = [
              ...chat.messages,
@@ -328,7 +347,6 @@ const ChatProvider = ({ children }) => {
              }
            ];
  
-           // Добавляем фидбек только если он ещё не был отправлен
            if (!hasFeedback(chatId, newBotMessageIndex)) {
              messages.push({
                text: t('feedback.requestFeedback'),

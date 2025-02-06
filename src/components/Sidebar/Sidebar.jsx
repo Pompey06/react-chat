@@ -59,7 +59,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
               onClick: handleNewChat,
               className: "bg-white"
             },
-            ...chats.map((chat, index) => ({
+            ...chats.slice().reverse().map((chat, index) => ({
               id: chat.id,
               text: chat.title || t('sidebar.newChat'),
               icon: <img src={previousChat} alt={t('sidebar.previousRequest')} className="w-5 h-5" />,
