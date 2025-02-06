@@ -1,9 +1,26 @@
 .sidebar {
    border-radius: 10px;
-   transition: all 0.4s ease-in-out;
+   transition: all 0.3s ease-in-out;
    width: 384px; /* или xl:min-w-96 в пикселях */
+   max-height: 100vh; /* Ограничиваем высоту */
+   overflow-y: auto; /* Добавляем вертикальную прокрутку */
  }
  
+ /* Стилизация скроллбара (опционально) */
+ .sidebar::-webkit-scrollbar {
+   width: 6px;
+ }
+ 
+ .sidebar::-webkit-scrollbar-track {
+   background: transparent;
+ }
+ 
+ .sidebar::-webkit-scrollbar-thumb {
+   background: rgba(255, 255, 255, 0.2);
+   border-radius: 3px;
+ }
+ 
+ /* Остальные стили остаются без изменений */
  .sidebar--close {
    width: 116px;
    min-width: 116px !important;
@@ -19,10 +36,9 @@
    transition: opacity 0.2s ease-in-out;
  }
  
- /* Когда сайдбар закрыт, прячем кнопки с анимацией */
  .sidebar--close .sidebar__buttons {
    opacity: 0;
-   visibility: hidden; /* Убираем из потока после того как opacity станет 0 */
+   visibility: hidden;
    transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
  }
  
@@ -46,15 +62,14 @@
      background-color: #1e3a8a;
      z-index: 50;
      transform: translateX(-100%);
-     transition: transform 0.4s ease-in-out;
+     transition: transform 0.3s ease-in-out;
    }
  
    .sidebar--close {
      transform: translateX(0);
-     width: 100%; /* Для мобильной версии всегда 100% */
+     width: 100%;
    }
  
-   /* Для мобильной версии другая анимация кнопок */
    .sidebar--close .sidebar__buttons {
      opacity: 1;
      visibility: visible;
