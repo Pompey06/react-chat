@@ -2,7 +2,6 @@
    border-radius: 10px;
    transition: all 0.3s ease-in-out;
    width: 384px; /* или xl:min-w-96 в пикселях */
-   max-height: 100vh; /* Ограничиваем высоту */
    overflow-y: auto; /* Добавляем вертикальную прокрутку */
  }
  
