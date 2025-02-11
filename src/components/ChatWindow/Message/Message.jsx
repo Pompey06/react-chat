@@ -2,8 +2,10 @@ import React from 'react';
 import axios from 'axios';
 import downloadIcon from '../../../assets/csv.svg';
 import './Message.css';
+import { useTranslation } from 'react-i18next';
 
 export default function Message({ text, isUser, isButton, onClick, filePath }) {
+   const { t } = useTranslation();
   // Функция для скачивания файла
   const handleDownload = async (e) => {
     e.preventDefault();
@@ -42,7 +44,7 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
         {text}
         {filePath && (
           <div className="mt-2 flex items-center">
-            <div className="sources-label">Источники:</div>
+            <div className="sources-label">{t('chat.sources')}</div>
             <div className="file-download-container">
               <a href="#" onClick={handleDownload} className="file-download-link">
                 <img src={downloadIcon} alt="Download file" className="file-icon" />
