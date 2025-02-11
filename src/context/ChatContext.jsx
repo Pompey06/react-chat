@@ -312,6 +312,9 @@ const ChatProvider = ({ children }) => {
      if (!currentChatId) {
        setCurrentChatId(conversationId);
      }
+
+     const filePath =
+           res.data.match_items?.find(item => item.data?.path)?.data?.path || null;
  
      // Добавляем ответ бота и обновляем информацию о чате
      setChats((prev) =>
@@ -319,13 +322,17 @@ const ChatProvider = ({ children }) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
            const chatId = chat.id || conversationId;
            const newBotMessageIndex = chat.messages.length + 1; // +1 потому что мы уже добавили сообщение пользователя
- 
+           
+
+
+
            const messages = [
              ...chat.messages,
              {
                text: res.data.content,
                isUser: false,
                isFeedback: false,
+               filePath,
              }
            ];
  
