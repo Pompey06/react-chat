@@ -8,22 +8,26 @@
 }
 
 .feedback-button {
-  border-radius: 10px;
-  border: 1px solid #0B427B;
-  background: #EEE;
-  color: #0B427B;
-  font-size: 20px;
-  padding: 12px 85px;
-  position: relative;
-}
-
-.feedback-button:hover {
-   background: #0B427B;
-}
-
-.feedback-button img {
-   transition: opacity 0.3s ease, transform 0.3s ease; /* Плавный переход */
+   border-radius: 10px;
+   border: 1px solid #0B427B;
+   background: #EEE;
+   color: #0B427B;
+   font-size: 20px;
+   padding: 12px 85px;
+   position: relative;
+   transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
  }
+ 
+ .feedback-button:hover {
+   background: #0B427B;
+   color: #fff;
+   border-color: #0B427B;
+ }
+ 
+ .feedback-button img {
+   transition: opacity 0.5s ease, transform 0.5s ease;
+ }
+ 
 
 @media (max-width: 930px) {
 

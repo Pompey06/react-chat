@@ -1,0 +1,24 @@
+.bad-feedback-button {
+   color: #FFF;
+font-size: 20px;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
+padding: 13px 61px;
+border-radius: 10px;
+background: #0B427B;
+margin-top: 25px;
+transition: background-color 0.5s ease;
+
+}
+
+.bad-feedback-button:hover {
+   background-color: #0f5cad;
+ }
+
+ @media (max-width: 450px) {
+   .bad-feedback-button {
+      padding: 13px;
+      width: 100%;
+   }
+ }

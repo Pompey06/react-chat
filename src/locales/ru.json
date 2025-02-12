@@ -4,44 +4,70 @@
      "noMessagesInChat": "Нет сообщений в этом чате"
    },
    "chat": {
-    "suggestionText": "Возможно вы искали ...",
-    "greeting": "Здравствуйте! Чем я могу вам помочь?",
-    "sources": "Источники:"
-  },
+     "suggestionText": "Возможно вы искали ...",
+     "greeting": "Здравствуйте! Чем я могу вам помочь?",
+     "sources": "Источники:"
+   },
    "sidebar": {
-    "close": "Закрыть боковую панель",
-    "newChat": "Новый чат",
-    "previousRequest": "Прошлый запрос",
-    "previousChat": "Прошлый чат {{number}}"
-  },
-  "feedback": {
-    "good": "Хорошо",
-    "bad": "Плохо",
-    "goodAlt": "Хороший отзыв",
-    "badAlt": "Плохой отзыв",
-    "goodAltHover": "Хороший отзыв (наведение)",
-    "badAltHover": "Плохой отзыв (наведение)",
-    "goodModalTitle": "Спасибо за вашу оценку!",
-    "goodModalDescription": "Мы рады, что вам понравилось. Хотите поделиться, что именно вам понравилось в ответе?",
-    "badModalTitle": "Нам жаль, что вы остались недовольны.",
-    "badModalDescription": "Мы хотим стать лучше! Расскажите, что можно улучшить.",
-    "requestFeedback": "Оцените качество ответа"
-  },
+     "close": "Закрыть боковую панель",
+     "newChat": "Новый чат",
+     "previousRequest": "Прошлый запрос",
+     "previousChat": "Прошлый чат {{number}}"
+   },
+   "feedback": {
+     "good": "Хорошо",
+     "bad": "Плохо",
+     "goodAlt": "Хороший отзыв",
+     "badAlt": "Плохой отзыв",
+     "goodAltHover": "Хороший отзыв (наведение)",
+     "badAltHover": "Плохой отзыв (наведение)",
+     "goodModalTitle": "Спасибо за вашу оценку!",
+     "goodModalDescription": "Мы рады, что вам понравилось. Хотите поделиться, что именно вам понравилось в ответе?",
+     "badModalTitle": "Нам жаль, что вы остались недовольны.",
+     "badModalDescription": "Мы хотим стать лучше! Расскажите, что можно улучшить.",
+     "requestFeedback": "Оцените качество ответа",
+     "badFeedbackPromptText": "Для регистрации заполните форму ниже",
+     "openRegistrationForm": "Заполнить форму"
+   },
    "modal": {
-    "close": "Закрыть",
-    "placeholder": "Оставьте свой отзыв ...",
-    "submit": "Отправить",
-    "feedbackSubmitted": "Отзыв отправлен"
-  },
-  "messageInput": {
-    "placeholder": "Отправить сообщение...",
-    "sendIconAlt": "Иконка отправки",
-    "sentMessage": "Отправлено сообщение"
-  },
-  "chatError": {
-    "errorMessage": "Извините, произошла ошибка. Переформулируйте, пожалуйста, ваш запрос."
-  },
-  "chatTyping": {
-    "typingMessage": "Печатает"
-  }
+     "close": "Закрыть",
+     "placeholder": "Оставьте свой отзыв ...",
+     "submit": "Отправить",
+     "feedbackSubmitted": "Отзыв отправлен"
+   },
+   "messageInput": {
+     "placeholder": "Отправить сообщение...",
+     "sendIconAlt": "Иконка отправки",
+     "sentMessage": "Отправлено сообщение"
+   },
+   "chatError": {
+     "errorMessage": "Извините, произошла ошибка. Переформулируйте, пожалуйста, ваш запрос."
+   },
+   "chatTyping": {
+     "typingMessage": "Печатает"
+   },
+   "registration": {
+     "physical": "Физическое лицо",
+     "legal": "Юридическое лицо",
+     "surname": "Фамилия",
+     "name": "Имя",
+     "patronymic": "Отчество",
+     "phone": "Номер телефона",
+     "email": "Email",
+     "bin": "БИН",
+     "iin": "ИИН",
+     "region": {
+       "select": "Выберите регион",
+       "option1": "1",
+       "option2": "2",
+       "option3": "3"
+     },
+     "description": "Описание Вашего вопроса, при необходимости прикрепите скриншоты",
+     "chooseFile": "Выбрать файл",
+     "fileInfo": "Файл не более 5 Мб.",
+     "removeFile": "Удалить",
+     "submit": "Отправить",
+     "submitting": "Отправка..."
+   }
  }
+ 

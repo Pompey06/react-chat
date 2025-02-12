@@ -1,7 +1,7 @@
 // FeedbackMessage.jsx
 import React, { useState, useContext, useCallback } from 'react';
 import { ChatContext } from '../../../context/ChatContext';
-import Modal from '../Modal/Modal';
+import FeedbackModal from '../Modal/FeedbackModal';
 import './Feedbackmessage.css';
 import badIcon from '../../../assets/bad.svg';
 import badIconHover from '../../../assets/bad-white.svg';
@@ -88,7 +88,7 @@ export default function FeedbackMessage({ messageIndex }) {
         </button>
       </div>
 
-      <Modal
+      <FeedbackModal
         isOpen={modalType === 'good'}
         onClose={closeModal}
         title={t('feedback.goodModalTitle')}
@@ -98,7 +98,7 @@ export default function FeedbackMessage({ messageIndex }) {
         messageIndex={selectedMessageIndex}
       />
 
-      <Modal
+      <FeedbackModal
         isOpen={modalType === 'bad'}
         onClose={closeModal}
         title={t('feedback.badModalTitle')}

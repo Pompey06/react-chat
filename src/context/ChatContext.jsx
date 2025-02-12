@@ -485,13 +485,40 @@ const sendFeedback = async (rate, text, messageIndex) => {
  
      // Удаляем сообщение с фидбеком из чата
      removeFeedbackMessage(messageIndex);
-     
+ 
+     // Если пользователь отправил плохой отзыв, добавляем сообщение для регистрации
+     if (rate === 'bad') {
+       setChats(prevChats =>
+         prevChats.map(chat => {
+           if (
+             String(chat.id) === String(currentChatId) ||
+             (chat.id === null && currentChatId === null)
+           ) {
+             return {
+               ...chat,
+               messages: [
+                 ...chat.messages,
+                 {
+                   text: t('feedback.badFeedbackPromptText'), // "Для регистрации заполните форму ниже"
+                   isUser: false,
+                   isFeedback: false,
+                   badFeedbackPrompt: true, // флаг для рендера нового компонента
+                 },
+               ],
+             };
+           }
+           return chat;
+         })
+       );
+     }
+ 
      return response.data;
    } catch (error) {
      console.error('Error sending feedback:', error);
      throw error;
    }
  };
+ 
 
   return (
     <ChatContext.Provider
