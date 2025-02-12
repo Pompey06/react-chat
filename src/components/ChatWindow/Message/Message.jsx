@@ -8,25 +8,37 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
    const { t } = useTranslation();
 
    function linkifyText(text) {
-      // Простейший регулярное выражение для URL (можно улучшать)
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = text.split(urlRegex);
-      return parts.map((part, index) => {
-        if (part.match(urlRegex)) {
-          return (
-            <a
-              key={index}
-              href={part}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="message-link"
-            >
-              {part}
-            </a>
-          );
+      // Регулярное выражение, которое находит URL и отделяет завершающие символы (если они есть)
+      const urlRegex = /(https?:\/\/[^\s]+?)([),.?!]+)?(\s|$)/g;
+      const elements = [];
+      let lastIndex = 0;
+      let match;
+      while ((match = urlRegex.exec(text)) !== null) {
+        // Добавляем текст до URL
+        if (match.index > lastIndex) {
+          elements.push(text.substring(lastIndex, match.index));
         }
-        return part;
-      });
+        // match[1] — URL без завершающих символов
+        // match[2] — завершающие символы (если есть)
+        // match[3] — пробельный разделитель или конец строки
+        const url = match[1];
+        const trailing = match[2] || "";
+        // Формируем ссылку
+        elements.push(
+          <a key={match.index} href={url} target="_blank" rel="noopener noreferrer" className="message-link">
+            {url}
+          </a>
+        );
+        // Добавляем завершающие символы и разделитель как текст
+        elements.push(trailing);
+        elements.push(match[3]);
+        lastIndex = urlRegex.lastIndex;
+      }
+      // Если осталось что-то после последнего совпадения, добавляем это
+      if (lastIndex < text.length) {
+        elements.push(text.substring(lastIndex));
+      }
+      return elements;
     }
     
    
