@@ -10,8 +10,6 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit }) 
 
   // Состояние для типа лица: 'physical' (по умолчанию) или 'legal'
   const [entityType, setEntityType] = useState('physical');
-  // Состояние для открытого селекта региона (если потребуется в будущем)
-  const [regionOpen, setRegionOpen] = useState(false);
 
   // Используем refs для полей формы
   const surnameRef = useRef(null);

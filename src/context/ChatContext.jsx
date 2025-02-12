@@ -171,6 +171,7 @@ const ChatProvider = ({ children }) => {
    }
  }, [currentChatId]);
 
+
  const createNewChat = () => {
    // Находим текущий чат
    const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
@@ -313,8 +314,6 @@ const ChatProvider = ({ children }) => {
        setCurrentChatId(conversationId);
      }
 
-   //  const filePath =
-   //        res.data.match_items?.find(item => item.data?.path)?.data?.path || null;
 
            const filePath = res.data.match_items?.find(item => {
             const path = item.data?.path;

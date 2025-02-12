@@ -6,6 +6,31 @@ import { useTranslation } from 'react-i18next';
 
 export default function Message({ text, isUser, isButton, onClick, filePath }) {
    const { t } = useTranslation();
+
+   function linkifyText(text) {
+      // Простейший регулярное выражение для URL (можно улучшать)
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = text.split(urlRegex);
+      return parts.map((part, index) => {
+        if (part.match(urlRegex)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="message-link"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      });
+    }
+    
+   
+
   // Функция для скачивания файла
   const handleDownload = async (e) => {
     e.preventDefault();
@@ -41,7 +66,7 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
       onClick={isButton ? onClick : undefined}
     >
       <div>
-        {text}
+      {linkifyText(text)}
         {filePath && (
           <div className="mt-2 flex items-center">
             <div className="sources-label">{t('chat.sources')}</div>
