@@ -267,7 +267,7 @@ const ChatProvider = ({ children }) => {
  
    const params = {
      prompt: text,
-     category_filter: categoryFilter || '',
+     category_filter: categoryFilter ? categoryFilter : null,
      locale,
    };
  
