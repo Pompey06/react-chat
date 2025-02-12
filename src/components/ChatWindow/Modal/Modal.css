@@ -197,6 +197,7 @@ line-height: normal;
    background-size: contain;
    transition: transform 0.3s ease;
    cursor: pointer;
+   pointer-events: none;
  }
 
  

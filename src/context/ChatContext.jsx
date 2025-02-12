@@ -313,10 +313,15 @@ const ChatProvider = ({ children }) => {
        setCurrentChatId(conversationId);
      }
 
-     const filePath =
-           res.data.match_items?.find(item => item.data?.path)?.data?.path || null;
- 
-     // Добавляем ответ бота и обновляем информацию о чате
+   //  const filePath =
+   //        res.data.match_items?.find(item => item.data?.path)?.data?.path || null;
+
+           const filePath = res.data.match_items?.find(item => {
+            const path = item.data?.path;
+            return path && path.toLowerCase().endsWith('.pdf');
+          })?.data?.path || null;
+          
+
      setChats((prev) =>
        prev.map((chat) => {
          if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
