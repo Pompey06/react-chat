@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import downloadIcon from '../../../assets/csv.svg';
+import downloadIcon from '../../../assets/pdf.svg';
 import './Message.css';
 import { useTranslation } from 'react-i18next';
 
