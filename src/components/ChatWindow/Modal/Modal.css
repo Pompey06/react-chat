@@ -11,7 +11,7 @@
 /* Textarea */
 textarea {
    border-radius: 10px;
-   border: 1px solid #0b427b;
+   border: 1px solid #0086bf;
    background: #eee;
    resize: none;
    font-size: 16px;
@@ -37,7 +37,7 @@ textarea:focus {
 }
 
 .modal {
-   border-left: 20px solid #fb8033;
+   border-left: 20px solid #f6be00;
 }
 
 /* Стили для инпутов и textarea в регистрации */
@@ -116,12 +116,12 @@ textarea:focus {
    width: 20px;
    height: 20px;
    border-radius: 160px;
-   border: 1px solid var(--blue, #0b427b);
-   background: var(--white, #fff);
+   border: 1px solid #0086bf;
+   background: #fff;
 }
 
 .entity-radio.active {
-   background: var(--blue, #0b427b);
+   background: #0086bf;
 }
 
 .entity-option span {

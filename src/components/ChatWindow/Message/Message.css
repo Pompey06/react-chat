@@ -6,23 +6,21 @@
 }
 
 .user {
-   border-right: 16px solid #0B427B;
+   border-right: 16px solid #0086bf;
    padding: 23px 32px 23px 48px;
-
 }
 
 .ai {
-   border-left: 16px solid #FB8033;
+   border-left: 16px solid #f6be00;
    padding: 23px 48px 23px 32px;
-
 }
 
 .file-download-container {
    display: flex;
    align-items: center;
- }
- 
- .file-download-link {
+}
+
+.file-download-link {
    display: flex;
    align-items: center;
    text-decoration: none;
@@ -33,44 +31,41 @@
    border: 1px solid transparent;
    border-radius: 4px;
    transition: background-color 0.2s ease, border-color 0.2s ease;
- }
- 
- .file-download-link:hover {
+}
+
+.file-download-link:hover {
    background-color: #e6f0ff;
    border-color: #b3d1ff;
- }
- 
- .file-icon {
+}
+
+.file-icon {
    margin-right: 6px;
    width: 20px;
    height: 20px;
- }
- 
- .file-name {
-   font-size: 16px;
- }
+}
 
- .message-link {
+.file-name {
+   font-size: 16px;
+}
+
+.message-link {
    color: #007bff;
    text-decoration: underline;
    cursor: pointer;
- }
- .message-link:hover {
+}
+.message-link:hover {
    color: #0056b3;
- }
- 
- 
-
-@media (max-width:930px) {
-   
-.message {
-   max-width: 80%;
- }
 }
 
+@media (max-width: 930px) {
+   .message {
+      max-width: 80%;
+   }
+}
 
-@media (max-width:700px) {
-   .user, .ai {
+@media (max-width: 700px) {
+   .user,
+   .ai {
       padding: 16px;
       margin-bottom: 16px;
       font-size: 16px;

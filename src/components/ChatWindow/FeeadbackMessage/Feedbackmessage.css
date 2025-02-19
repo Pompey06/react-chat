@@ -1,58 +1,54 @@
 .feedback-message {
-  padding: 24px 28px;
-  font-size: 20px;
-  border-radius: 10px;
-  color: var(--Miscellaneous-Floating-Tab---Text-Unselected, #090909);
-  max-width: 672px;
-  border-left: 16px solid #FB8033;
+   padding: 24px 28px;
+   font-size: 20px;
+   border-radius: 10px;
+   color: var(--Miscellaneous-Floating-Tab---Text-Unselected, #090909);
+   max-width: 672px;
+   border-left: 16px solid #f6be00;
 }
 
 .feedback-button {
    border-radius: 10px;
-   border: 1px solid #0B427B;
-   background: #EEE;
-   color: #0B427B;
+   border: 1px solid #0086bf;
+   background: #eee;
+   color: #0086bf;
    font-size: 20px;
    padding: 12px 85px;
    position: relative;
    transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
- }
- 
- .feedback-button:hover {
-   background: #0B427B;
-   color: #fff;
-   border-color: #0B427B;
- }
- 
- .feedback-button img {
-   transition: opacity 0.5s ease, transform 0.5s ease;
- }
- 
-
-@media (max-width: 930px) {
-
-
-  .feedback-message__btns {
-    flex-direction: column;
-  }
-
-  .feedback-button {
-    padding: 12px 65px;
-  }
 }
 
-@media (max-width:700px) {
+.feedback-button:hover {
+   background: #0086bf;
+   color: #fff;
+   border-color: #0086bf;
+}
+
+.feedback-button img {
+   transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+@media (max-width: 930px) {
+   .feedback-message__btns {
+      flex-direction: column;
+   }
+
+   .feedback-button {
+      padding: 12px 65px;
+   }
+}
+
+@media (max-width: 700px) {
    .feedback-message {
       padding: 16px;
       margin-bottom: 8px;
       font-size: 16px;
-
    }
    .feedback-button {
       padding: 9px 51px;
-    }
-    .feedback__button {
+   }
+   .feedback__button {
       padding: 14px 71px;
       max-width: 214px;
-    }
+   }
 }

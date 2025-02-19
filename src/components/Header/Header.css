@@ -1,10 +1,10 @@
 .header {
-   border-bottom: 1px solid #D3D3D3;;
+   border-bottom: 1px solid #d3d3d3;
 }
 
 .language {
-border: 1px solid #0B427B;
-border-radius: 5px;
+   border: 1px solid #0086bf;
+   border-radius: 5px;
 }
 
 .language__button {
@@ -15,17 +15,17 @@ border-radius: 5px;
    width: 40px;
    height: 40px;
    cursor: pointer;
- }
- 
- @media (min-width: 700px) {
-   .header__burger-icon {
-     display: none;
-   }
- }
+}
 
- @media (max-width:700px) {
+@media (min-width: 700px) {
+   .header__burger-icon {
+      display: none;
+   }
+}
+
+@media (max-width: 700px) {
    .header {
       justify-content: space-between;
       width: 100%;
    }
- }
+}
