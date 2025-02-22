@@ -48,36 +48,45 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
                {messages.map((message, index) => {
                   const isFirstMessage = index === 0;
                   const botMessageIndex = getBotMessageIndex(index);
-
-                  // Если сообщение содержит флаг регистрации плохого отзыва, рендерим отдельный компонент
-                  if (message.badFeedbackPrompt) {
-                     return (
-                        <React.Fragment key={index}>
-                           <BadFeedbackRegistrationMessage />
-                           {isFirstMessage && showInitialButtons && (
-                              <div className="suggestion-text mt-4">{t("chat.suggestionText")}</div>
-                           )}
-                        </React.Fragment>
-                     );
-                  }
+                  const hasSubcategoryButtons = messages.some((msg) => msg.isButton && msg.isSubcategory);
+                  const hasReportButtons = messages.some((msg) => msg.isButton && msg.isReport);
+                  const hasFaqButtons = messages.some((msg) => msg.isButton && msg.isFaq);
 
                   return (
                      <React.Fragment key={index}>
                         {message.isFeedback ? (
                            <FeedbackMessage text={message.text} messageIndex={botMessageIndex} />
                         ) : (
-                           <Message
-                              text={message.text}
-                              isUser={message.isUser}
-                              messageIndex={botMessageIndex}
-                              isButton={message.isButton}
-                              onClick={() => handleButtonClick(message)}
-                              filePath={message.filePath}
-                           />
-                        )}
+                           <>
+                              <Message
+                                 text={message.text}
+                                 isUser={message.isUser}
+                                 messageIndex={botMessageIndex}
+                                 isButton={message.isButton}
+                                 onClick={() => handleButtonClick(message)}
+                                 filePath={message.filePath}
+                              />
 
-                        {isFirstMessage && showInitialButtons && (
-                           <div className="suggestion-text mt-4">{t("chat.suggestionText")}</div>
+                              {/* Текст для начальных категорий */}
+                              {isFirstMessage && showInitialButtons && (
+                                 <div className="suggestion-text mt-4">{t("chat.suggestionText")}</div>
+                              )}
+
+                              {/* Текст для подкатегорий */}
+                              {isFirstMessage && hasSubcategoryButtons && (
+                                 <div className="suggestion-text mt-4">{t("chat.interestingSuggestion")}</div>
+                              )}
+
+                              {/* Текст для репортов */}
+                              {isFirstMessage && hasReportButtons && (
+                                 <div className="suggestion-text mt-4">{t("chat.interestingSuggestion")}</div>
+                              )}
+
+                              {/* Текст для FAQ вопросов */}
+                              {isFirstMessage && hasFaqButtons && (
+                                 <div className="suggestion-text mt-4">{t("chat.interestingSuggestion")}</div>
+                              )}
+                           </>
                         )}
                      </React.Fragment>
                   );
