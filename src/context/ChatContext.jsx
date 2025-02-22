@@ -7,6 +7,9 @@ const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
    const { t, i18n } = useTranslation();
+   const [translationsKz, setTranslationsKz] = useState({});
+   const [categories, setCategories] = useState([]);
+   const [currentCategory, setCurrentCategory] = useState(null);
 
    const createDefaultChat = () => ({
       id: null,
@@ -127,49 +130,87 @@ const ChatProvider = ({ children }) => {
    }, []);
 
    const fetchInitialMessages = async () => {
+      // Проверяем, есть ли у нас уже загруженные категории
+      if (categories.length > 0) {
+         updateChatWithExistingCategories();
+         return;
+      }
+
       try {
          const res = await axios.get(`${import.meta.env.VITE_API_URL}/assistant/categories`);
-         // Извлекаем категории и переводы для казахского языка из ответа
-         const categories = res.data.categories;
-         const translationsKz = res.data.translations_kz; // объект с переводами
+         const fetchedCategories = res.data.categories;
+         setCategories(fetchedCategories);
+         setTranslationsKz(res.data.translations_kz || {});
 
-         setChats((prev) =>
-            prev.map((chat) => {
-               if (
-                  chat.isEmpty &&
-                  (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))
-               ) {
-                  return {
-                     ...chat,
-                     messages: [
-                        chat.messages[0], // сохраняем приветственное сообщение
-                        ...categories.slice(0, 4).map((cat) => {
-                           // Если выбран русский язык, используем cat.name,
-                           // если казахский — ищем перевод в translationsKz, если его нет, используем оригинал
-                           const displayName =
-                              locale === "ru" ? cat.name : (translationsKz && translationsKz[cat.name]) || cat.name;
-                           return {
-                              text: displayName,
-                              isUser: true,
-                              isFeedback: false,
-                              isButton: true,
-                           };
-                        }),
-                     ],
-                     buttonsWereShown: true,
-                  };
-               }
-               return chat;
-            })
-         );
+         updateChatWithCategories(fetchedCategories);
       } catch (error) {
          console.error("Ошибка при загрузке начальных сообщений:", error);
       }
    };
 
+   const updateChatWithExistingCategories = () => {
+      setChats((prev) =>
+         prev.map((chat) => {
+            if (
+               chat.isEmpty &&
+               (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))
+            ) {
+               return {
+                  ...chat,
+                  messages: [
+                     chat.messages[0],
+                     ...categories.slice(0, 4).map((cat) => ({
+                        text: locale === "ru" ? cat.name : translationsKz[cat.name] || cat.name,
+                        isUser: true,
+                        isFeedback: false,
+                        isButton: true,
+                        category: cat,
+                     })),
+                  ],
+                  buttonsWereShown: true,
+               };
+            }
+            return chat;
+         })
+      );
+   };
+
+   const updateChatWithCategories = (fetchedCategories) => {
+      setChats((prev) =>
+         prev.map((chat) => {
+            if (
+               chat.isEmpty &&
+               (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))
+            ) {
+               return {
+                  ...chat,
+                  messages: [
+                     chat.messages[0],
+                     ...fetchedCategories.slice(0, 4).map((cat) => ({
+                        text: locale === "ru" ? cat.name : translationsKz[cat.name] || cat.name,
+                        isUser: true,
+                        isFeedback: false,
+                        isButton: true,
+                        category: cat,
+                     })),
+                  ],
+                  buttonsWereShown: true,
+               };
+            }
+            return chat;
+         })
+      );
+   };
+
    useEffect(() => {
       if (currentChatId === null) {
-         fetchInitialMessages();
+         if (currentCategory) {
+            // Если есть выбранная категория, обновляем её содержимое
+            handleButtonClick(currentCategory);
+         } else if (categories.length > 0) {
+            // Если категория не выбрана, показываем начальные категории
+            updateChatWithExistingCategories();
+         }
       }
    }, [i18n.language]);
 
@@ -186,6 +227,7 @@ const ChatProvider = ({ children }) => {
    }, [currentChatId]);
 
    const createNewChat = () => {
+      setCurrentCategory(null);
       // Находим текущий чат
       const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
 
@@ -239,6 +281,7 @@ const ChatProvider = ({ children }) => {
    };
 
    const switchChat = async (chatId) => {
+      setCurrentCategory(null);
       if (String(chatId) === String(currentChatId)) {
          return;
       }
@@ -399,21 +442,50 @@ const ChatProvider = ({ children }) => {
          setIsTyping(false);
       }
    }
-
-   const handleButtonClick = (value) => {
-      setCategoryFilter(value);
+   const handleButtonClick = (selectedCategory) => {
+      setCategoryFilter(selectedCategory.name);
+      setCurrentCategory(selectedCategory); // Сохраняем выбранную категорию
 
       setChats((prev) =>
          prev.map((chat) => {
             if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+               let newButtons = [];
+               if (selectedCategory.subcategories && selectedCategory.subcategories.length > 0) {
+                  newButtons = selectedCategory.subcategories.map((subcat) => {
+                     const displayName =
+                        locale === "ru" ? subcat.name : (translationsKz && translationsKz[subcat.name]) || subcat.name;
+                     return {
+                        text: displayName,
+                        isUser: true,
+                        isFeedback: false,
+                        isButton: true,
+                        category: selectedCategory,
+                        subcategory: true,
+                        subcatData: subcat,
+                     };
+                  });
+               } else if (selectedCategory.faq && selectedCategory.faq.length > 0) {
+                  newButtons = selectedCategory.faq.map((faq) => {
+                     const displayName =
+                        locale === "ru"
+                           ? faq.question
+                           : (translationsKz && translationsKz[faq.question]) || faq.question;
+                     return {
+                        text: displayName,
+                        isUser: true,
+                        isFeedback: false,
+                        isButton: true,
+                        category: selectedCategory,
+                        faq: true,
+                        faqData: faq,
+                     };
+                  });
+               }
                return {
                   ...chat,
                   showInitialButtons: false,
                   buttonsWereHidden: true,
-                  messages: [
-                     chat.messages[0], // Сохраняем приветственное сообщение
-                     ...chat.messages.slice(1).filter((message) => !message.isButton), // Удаляем кнопки
-                  ],
+                  messages: [chat.messages[0], ...newButtons],
                };
             }
             return chat;
