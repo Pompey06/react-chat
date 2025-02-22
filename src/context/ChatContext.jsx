@@ -204,6 +204,7 @@ const ChatProvider = ({ children }) => {
          })
       );
    };
+
    useEffect(() => {
       if (currentChatId === null) {
          if (currentSubcategory) {
@@ -330,17 +331,20 @@ const ChatProvider = ({ children }) => {
       }
    };
 
-   async function createMessage(text, isFeedback = false) {
+   async function createMessage(text, isFeedback = false, additionalParams = {}) {
       if (!text) return;
 
       const currentChat = chats.find(
          (c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0])
       );
 
+      // Формируем параметры запроса
       const params = {
          prompt: text,
-         category_filter: categoryFilter ? categoryFilter : null,
          locale,
+         category: currentCategory?.name || null,
+         subcategory: additionalParams?.subcategory || null,
+         subcategory_report: additionalParams?.subcategory_report || null,
       };
 
       if (currentChat && currentChat.id) {
@@ -370,13 +374,13 @@ const ChatProvider = ({ children }) => {
             })
          );
 
-         // Отправляем запрос
+         // Отправляем запрос с новыми параметрами
          const res = await axios.post(`${import.meta.env.VITE_API_URL}/assistant/ask`, null, { params });
 
+         // Остальной код обработки ответа остается без изменений
          const conversationId = res.data.conversation_id;
          const conversationTitle = res.data.conversation_title;
 
-         // Если это первое сообщение в чате
          if (!currentChatId) {
             setCurrentChatId(conversationId);
          }
@@ -391,7 +395,7 @@ const ChatProvider = ({ children }) => {
             prev.map((chat) => {
                if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
                   const chatId = chat.id || conversationId;
-                  const newBotMessageIndex = chat.messages.length + 1; // +1 потому что мы уже добавили сообщение пользователя
+                  const newBotMessageIndex = chat.messages.length + 1;
 
                   const messages = [
                      ...chat.messages,
@@ -403,7 +407,6 @@ const ChatProvider = ({ children }) => {
                      },
                   ];
 
-                  // Добавляем фидбек только если он ещё не был отправлен
                   if (!hasFeedback(chatId, newBotMessageIndex)) {
                      messages.push({
                         text: t("feedback.requestFeedback"),
@@ -459,11 +462,9 @@ const ChatProvider = ({ children }) => {
    const handleButtonClick = (selectedItem) => {
       console.log("Selected item:", selectedItem);
 
-      // Если это основная категория (первый уровень)
+      // Если это основная категория с подкатегориями (первый уровень)
       if (selectedItem?.subcategories || selectedItem?.category?.subcategories) {
-         // Определяем, откуда брать данные (из самого item или из его category)
          const categoryData = selectedItem.category || selectedItem;
-
          setCategoryFilter(categoryData.name);
          setCurrentCategory(categoryData);
 
@@ -486,6 +487,40 @@ const ChatProvider = ({ children }) => {
                      showInitialButtons: false,
                      buttonsWereHidden: true,
                      messages: [chat.messages[0], ...subcategoryButtons],
+                  };
+               }
+               return chat;
+            })
+         );
+         return;
+      }
+
+      // Проверяем, является ли selectedItem категорией с FAQ (без подкатегорий)
+      if (selectedItem?.category?.faq || (selectedItem?.faq && !selectedItem?.subcategories)) {
+         const categoryData = selectedItem.category || selectedItem;
+         setCategoryFilter(categoryData.name);
+         setCurrentCategory(categoryData);
+
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  const faqButtons = categoryData.faq.map((faq) => ({
+                     text:
+                        locale === "ru"
+                           ? faq.question
+                           : (translationsKz && translationsKz[faq.question]) || faq.question,
+                     isUser: true,
+                     isFeedback: false,
+                     isButton: true,
+                     isFaq: true,
+                     faqData: faq,
+                  }));
+
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     messages: [chat.messages[0], ...faqButtons],
                   };
                }
                return chat;
@@ -526,40 +561,51 @@ const ChatProvider = ({ children }) => {
 
       // Если это report (третий уровень)
       if (selectedItem?.isReport) {
-         createMessage(selectedItem.text);
-         return;
-      }
+         if (currentCategory?.faq) {
+            setChats((prev) =>
+               prev.map((chat) => {
+                  if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                     const faqButtons = currentCategory.faq.map((faq) => ({
+                        text:
+                           locale === "ru"
+                              ? faq.question
+                              : (translationsKz && translationsKz[faq.question]) || faq.question,
+                        isUser: true,
+                        isFeedback: false,
+                        isButton: true,
+                        isFaq: true,
+                        faqData: faq,
+                        selectedReport: selectedItem.reportText,
+                     }));
 
-      // Если это FAQ
-      if (selectedItem?.faq) {
-         const faqButtons = selectedItem.faq.map((faq) => ({
-            text: locale === "ru" ? faq.question : (translationsKz && translationsKz[faq.question]) || faq.question,
-            isUser: true,
-            isFeedback: false,
-            isButton: true,
-            isFaq: true,
-            faqData: faq,
-         }));
-
-         setChats((prev) =>
-            prev.map((chat) => {
-               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-                  return {
-                     ...chat,
-                     showInitialButtons: false,
-                     buttonsWereHidden: true,
-                     messages: [chat.messages[0], ...faqButtons],
-                  };
-               }
-               return chat;
-            })
-         );
+                     return {
+                        ...chat,
+                        showInitialButtons: false,
+                        buttonsWereHidden: true,
+                        messages: [chat.messages[0], ...faqButtons],
+                     };
+                  }
+                  return chat;
+               })
+            );
+         }
          return;
       }
 
       // Если это FAQ вопрос
       if (selectedItem?.isFaq) {
-         createMessage(selectedItem.text);
+         if (selectedItem.selectedReport) {
+            createMessage(selectedItem.text, false, {
+               subcategory: currentSubcategory?.name,
+               subcategory_report: selectedItem.selectedReport,
+            });
+         } else {
+            createMessage(selectedItem.text, false, {
+               category: currentCategory?.name,
+               subcategory: null,
+               subcategory_report: null,
+            });
+         }
          return;
       }
    };
