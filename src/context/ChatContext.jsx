@@ -10,6 +10,7 @@ const ChatProvider = ({ children }) => {
    const [translationsKz, setTranslationsKz] = useState({});
    const [categories, setCategories] = useState([]);
    const [currentCategory, setCurrentCategory] = useState(null);
+   const [currentSubcategory, setCurrentSubcategory] = useState(null);
 
    const createDefaultChat = () => ({
       id: null,
@@ -148,33 +149,6 @@ const ChatProvider = ({ children }) => {
       }
    };
 
-   const updateChatWithExistingCategories = () => {
-      setChats((prev) =>
-         prev.map((chat) => {
-            if (
-               chat.isEmpty &&
-               (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))
-            ) {
-               return {
-                  ...chat,
-                  messages: [
-                     chat.messages[0],
-                     ...categories.slice(0, 4).map((cat) => ({
-                        text: locale === "ru" ? cat.name : translationsKz[cat.name] || cat.name,
-                        isUser: true,
-                        isFeedback: false,
-                        isButton: true,
-                        category: cat,
-                     })),
-                  ],
-                  buttonsWereShown: true,
-               };
-            }
-            return chat;
-         })
-      );
-   };
-
    const updateChatWithCategories = (fetchedCategories) => {
       setChats((prev) =>
          prev.map((chat) => {
@@ -202,13 +176,48 @@ const ChatProvider = ({ children }) => {
       );
    };
 
+   const updateChatWithExistingCategories = () => {
+      setChats((prev) =>
+         prev.map((chat) => {
+            if (
+               chat.isEmpty &&
+               (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null))
+            ) {
+               const categoryButtons = categories.slice(0, 4).map((cat) => ({
+                  text: locale === "ru" ? cat.name : translationsKz[cat.name] || cat.name,
+                  isUser: true,
+                  isFeedback: false,
+                  isButton: true,
+                  name: cat.name,
+                  category: cat,
+                  subcategories: cat.subcategories,
+                  faq: cat.faq,
+               }));
+
+               return {
+                  ...chat,
+                  messages: [chat.messages[0], ...categoryButtons],
+                  buttonsWereShown: true,
+               };
+            }
+            return chat;
+         })
+      );
+   };
    useEffect(() => {
       if (currentChatId === null) {
-         if (currentCategory) {
-            // Если есть выбранная категория, обновляем её содержимое
+         if (currentSubcategory) {
+            // Если есть выбранная подкатегория, показываем её reports
+            handleButtonClick({
+               ...currentSubcategory,
+               subcategory: true,
+               category: currentCategory,
+            });
+         } else if (currentCategory) {
+            // Если есть только категория, показываем её содержимое
             handleButtonClick(currentCategory);
          } else if (categories.length > 0) {
-            // Если категория не выбрана, показываем начальные категории
+            // Если ничего не выбрано, показываем начальные категории
             updateChatWithExistingCategories();
          }
       }
@@ -228,6 +237,8 @@ const ChatProvider = ({ children }) => {
 
    const createNewChat = () => {
       setCurrentCategory(null);
+      setCurrentSubcategory(null);
+      setCategoryFilter(null);
       // Находим текущий чат
       const currentChat = chats.find((c) => String(c.id) === String(currentChatId));
 
@@ -282,6 +293,8 @@ const ChatProvider = ({ children }) => {
 
    const switchChat = async (chatId) => {
       setCurrentCategory(null);
+      setCurrentSubcategory(null);
+      setCategoryFilter(null);
       if (String(chatId) === String(currentChatId)) {
          return;
       }
@@ -442,55 +455,113 @@ const ChatProvider = ({ children }) => {
          setIsTyping(false);
       }
    }
-   const handleButtonClick = (selectedCategory) => {
-      setCategoryFilter(selectedCategory.name);
-      setCurrentCategory(selectedCategory); // Сохраняем выбранную категорию
 
-      setChats((prev) =>
-         prev.map((chat) => {
-            if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-               let newButtons = [];
-               if (selectedCategory.subcategories && selectedCategory.subcategories.length > 0) {
-                  newButtons = selectedCategory.subcategories.map((subcat) => {
-                     const displayName =
-                        locale === "ru" ? subcat.name : (translationsKz && translationsKz[subcat.name]) || subcat.name;
-                     return {
-                        text: displayName,
-                        isUser: true,
-                        isFeedback: false,
-                        isButton: true,
-                        category: selectedCategory,
-                        subcategory: true,
-                        subcatData: subcat,
-                     };
-                  });
-               } else if (selectedCategory.faq && selectedCategory.faq.length > 0) {
-                  newButtons = selectedCategory.faq.map((faq) => {
-                     const displayName =
-                        locale === "ru"
-                           ? faq.question
-                           : (translationsKz && translationsKz[faq.question]) || faq.question;
-                     return {
-                        text: displayName,
-                        isUser: true,
-                        isFeedback: false,
-                        isButton: true,
-                        category: selectedCategory,
-                        faq: true,
-                        faqData: faq,
-                     };
-                  });
+   const handleButtonClick = (selectedItem) => {
+      console.log("Selected item:", selectedItem);
+
+      // Если это основная категория (первый уровень)
+      if (selectedItem?.subcategories || selectedItem?.category?.subcategories) {
+         // Определяем, откуда брать данные (из самого item или из его category)
+         const categoryData = selectedItem.category || selectedItem;
+
+         setCategoryFilter(categoryData.name);
+         setCurrentCategory(categoryData);
+
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  const subcategoryButtons = categoryData.subcategories.map((subcat) => ({
+                     text:
+                        locale === "ru" ? subcat.name : (translationsKz && translationsKz[subcat.name]) || subcat.name,
+                     isUser: true,
+                     isFeedback: false,
+                     isButton: true,
+                     isSubcategory: true,
+                     name: subcat.name,
+                     reports: subcat.reports,
+                  }));
+
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     messages: [chat.messages[0], ...subcategoryButtons],
+                  };
                }
-               return {
-                  ...chat,
-                  showInitialButtons: false,
-                  buttonsWereHidden: true,
-                  messages: [chat.messages[0], ...newButtons],
-               };
-            }
-            return chat;
-         })
-      );
+               return chat;
+            })
+         );
+         return;
+      }
+
+      // Если это подкатегория (второй уровень)
+      if (selectedItem?.isSubcategory && selectedItem?.reports) {
+         setCurrentSubcategory(selectedItem);
+         setCategoryFilter(selectedItem.name);
+
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  const reportButtons = selectedItem.reports.map((report) => ({
+                     text: locale === "ru" ? report : (translationsKz && translationsKz[report]) || report,
+                     isUser: true,
+                     isFeedback: false,
+                     isButton: true,
+                     isReport: true,
+                     reportText: report,
+                  }));
+
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     messages: [chat.messages[0], ...reportButtons],
+                  };
+               }
+               return chat;
+            })
+         );
+         return;
+      }
+
+      // Если это report (третий уровень)
+      if (selectedItem?.isReport) {
+         createMessage(selectedItem.text);
+         return;
+      }
+
+      // Если это FAQ
+      if (selectedItem?.faq) {
+         const faqButtons = selectedItem.faq.map((faq) => ({
+            text: locale === "ru" ? faq.question : (translationsKz && translationsKz[faq.question]) || faq.question,
+            isUser: true,
+            isFeedback: false,
+            isButton: true,
+            isFaq: true,
+            faqData: faq,
+         }));
+
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     messages: [chat.messages[0], ...faqButtons],
+                  };
+               }
+               return chat;
+            })
+         );
+         return;
+      }
+
+      // Если это FAQ вопрос
+      if (selectedItem?.isFaq) {
+         createMessage(selectedItem.text);
+         return;
+      }
    };
 
    const removeFeedbackMessage = (messageIndex) => {
