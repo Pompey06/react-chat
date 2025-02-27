@@ -56,6 +56,9 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
                      <React.Fragment key={index}>
                         {message.isFeedback ? (
                            <FeedbackMessage text={message.text} messageIndex={botMessageIndex} />
+                        ) : message.badFeedbackPrompt ? (
+                           // Рендер сообщения для плохого отзыва
+                           <BadFeedbackRegistrationMessage currentChatId={currentChatId} />
                         ) : (
                            <>
                               <Message

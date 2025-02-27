@@ -4,8 +4,9 @@ import clearIcon from "../../../assets/clearIcon.svg";
 import InputMask from "react-input-mask";
 import { useTranslation } from "react-i18next";
 import "./Modal.css";
+import axios from "axios";
 
-export default function RegistrationModal({ isOpen, onClose, title, onSubmit }) {
+export default function RegistrationModal({ isOpen, onClose, title, onSubmit, currentChatId }) {
    const { t } = useTranslation();
 
    // Состояние для типа лица: 'physical' (по умолчанию) или 'legal'
@@ -78,25 +79,46 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit }) 
    };
 
    const handleSubmit = async () => {
-      const formData = {
-         surname: surnameRef.current.value,
-         name: nameRef.current.value,
-         patronymic: patronymicRef.current.value,
+      const formData = new FormData();
+
+      // Общие данные для обоих типов
+      formData.append("conversation_id", currentChatId || "");
+      formData.append("last_name", surnameRef.current.value);
+      formData.append("first_name", nameRef.current.value);
+      formData.append("middle_name", patronymicRef.current.value);
+      formData.append("phone", phoneRef.current.value);
+      formData.append("email", emailRef.current.value);
+      formData.append("region", regionRef.current.value);
+      formData.append("description", descriptionRef.current.value);
+
+      // Добавляем файлы
+      selectedFiles.forEach((file) => {
+         formData.append("file", file);
+      });
+
+      // Если выбрано юридическое лицо, добавляем BIN и IIN
+      if (entityType === "legal") {
+         formData.append("bin_number", binRef.current.value);
+         formData.append("iin_number", iinRef.current.value);
+      }
+
+      // Валидация
+      const newErrors = {};
+      Object.entries({
+         last_name: surnameRef.current.value,
+         first_name: nameRef.current.value,
          phone: phoneRef.current.value,
          email: emailRef.current.value,
          region: regionRef.current.value,
-         description: descriptionRef.current.value,
-         bin: binRef.current ? binRef.current.value : "",
-         iin: iinRef.current ? iinRef.current.value : "",
-      };
-
-      const newErrors = {};
-      Object.entries(formData).forEach(([key, value]) => {
-         if (entityType === "physical" && (key === "bin" || key === "iin")) return;
-         if (value.trim() === "" && key !== "region") {
+         ...(entityType === "legal" && {
+            bin_number: binRef.current.value,
+            iin_number: iinRef.current.value,
+         }),
+      }).forEach(([key, value]) => {
+         if (!value.trim()) {
             newErrors[key] = true;
          } else {
-            if ((key === "bin" || key === "iin") && !/^\d+$/.test(value)) {
+            if ((key === "bin_number" || key === "iin_number") && !/^\d+$/.test(value)) {
                newErrors[key] = true;
             }
             if (key === "phone" && !/^[0-9+\-\s()]+$/.test(value)) {
@@ -107,12 +129,29 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit }) 
             }
          }
       });
+
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) return;
 
       setIsSubmitting(true);
+
       try {
-         await onSubmit({ entityType, ...formData, files: selectedFiles });
+         // Выбираем эндпоинт в зависимости от типа лица
+         const endpoint =
+            entityType === "physical"
+               ? `${import.meta.env.VITE_API_URL}/form/submit-form/individual`
+               : `${import.meta.env.VITE_API_URL}/form/submit-form/corporate`;
+
+         // Отправка данных на API
+         const response = await axios.post(endpoint, formData, {
+            headers: {
+               "Content-Type": "multipart/form-data",
+            },
+         });
+
+         console.log("Форма успешно отправлена:", response.data);
+
+         // Очистка формы после успешной отправки
          if (surnameRef.current) surnameRef.current.value = "";
          if (nameRef.current) nameRef.current.value = "";
          if (patronymicRef.current) patronymicRef.current.value = "";
@@ -124,8 +163,9 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit }) 
          if (iinRef.current) iinRef.current.value = "";
          setSelectedFiles([]);
          setErrors({});
+         onSubmit(response.data); // Вызываем callback после успешной отправки
       } catch (error) {
-         console.error("Error submitting registration form:", error);
+         console.error("Ошибка при отправке формы:", error);
       } finally {
          setIsSubmitting(false);
       }
