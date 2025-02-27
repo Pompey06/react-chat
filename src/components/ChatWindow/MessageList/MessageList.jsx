@@ -68,6 +68,7 @@ export default function MessageList({ isSidebarOpen, toggleSidebar }) {
                                  isButton={message.isButton}
                                  onClick={() => handleButtonClick(message)}
                                  filePath={message.filePath}
+                                 isHtml={!message.isUser}
                               />
 
                               {/* Текст для начальных категорий */}

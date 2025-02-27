@@ -374,6 +374,14 @@ const ChatProvider = ({ children }) => {
             })
          );
 
+         const formatBotResponse = (text) => {
+            // Не заменяем \n на <br />, а просто добавляем флаг
+            return {
+               text: text,
+               hasLineBreaks: text.includes("\n"),
+            };
+         };
+
          // Отправляем запрос с новыми параметрами
          const res = await axios.post(`${import.meta.env.VITE_API_URL}/assistant/ask`, null, { params });
 
@@ -391,6 +399,8 @@ const ChatProvider = ({ children }) => {
                return path && path.toLowerCase().endsWith(".pdf");
             })?.data?.path || null;
 
+         const formattedResponse = formatBotResponse(res.data.content);
+
          setChats((prev) =>
             prev.map((chat) => {
                if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
@@ -400,10 +410,11 @@ const ChatProvider = ({ children }) => {
                   const messages = [
                      ...chat.messages,
                      {
-                        text: res.data.content,
+                        text: formattedResponse.text,
                         isUser: false,
                         isFeedback: false,
                         filePath,
+                        hasLineBreaks: formattedResponse.hasLineBreaks,
                      },
                   ];
 

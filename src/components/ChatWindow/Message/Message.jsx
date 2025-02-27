@@ -7,7 +7,22 @@ import { useTranslation } from "react-i18next";
 export default function Message({ text, isUser, isButton, onClick, filePath }) {
    const { t } = useTranslation();
 
+   // Функция для обработки текста с переносами строк
+   function renderTextWithLineBreaks(text) {
+      if (!text) return null;
+
+      // Разбиваем текст по переносам строк
+      return text.split("\n").map((line, index, array) => (
+         <React.Fragment key={index}>
+            {linkifyText(line)}
+            {index < array.length - 1 && <br />}
+         </React.Fragment>
+      ));
+   }
+
    function linkifyText(text) {
+      if (!text) return null;
+
       // Регулярное выражение, которое находит URL и отделяет завершающие символы (если они есть)
       const urlRegex = /(https?:\/\/[^\s]+?)([),.?!]+)?(\s|$)/g;
       const elements = [];
@@ -40,6 +55,9 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
       }
       return elements;
    }
+
+   // Проверяем, содержит ли текст переносы строк
+   const hasLineBreaks = !isUser && text && text.includes("\n");
 
    // Функция для скачивания файла
    const handleDownload = async (e) => {
@@ -74,7 +92,7 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
          onClick={isButton ? onClick : undefined}
       >
          <div>
-            {linkifyText(text)}
+            {hasLineBreaks ? renderTextWithLineBreaks(text) : linkifyText(text)}
             {filePath && (
                <div className="mt-2 flex items-center">
                   <div className="sources-label">{t("chat.sources")}</div>
