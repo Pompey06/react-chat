@@ -207,6 +207,7 @@ const ChatProvider = ({ children }) => {
 
    useEffect(() => {
       if (currentChatId === null) {
+         /* Temporarily commented out subcategory and category handling
          if (currentSubcategory) {
             // Если есть выбранная подкатегория, показываем её reports
             handleButtonClick({
@@ -217,7 +218,9 @@ const ChatProvider = ({ children }) => {
          } else if (currentCategory) {
             // Если есть только категория, показываем её содержимое
             handleButtonClick(currentCategory);
-         } else if (categories.length > 0) {
+         } else 
+         */
+         if (categories.length > 0) {
             // Если ничего не выбрано, показываем начальные категории
             updateChatWithExistingCategories();
          }
@@ -343,8 +346,8 @@ const ChatProvider = ({ children }) => {
          prompt: text,
          locale,
          category: currentCategory?.name || null,
-         subcategory: additionalParams?.subcategory || null,
-         subcategory_report: additionalParams?.subcategory_report || null,
+         subcategory: null, // Временно всегда null
+         subcategory_report: null, // Временно всегда null
       };
 
       if (currentChat && currentChat.id) {
@@ -473,7 +476,29 @@ const ChatProvider = ({ children }) => {
    const handleButtonClick = (selectedItem) => {
       console.log("Selected item:", selectedItem);
 
-      // Если это основная категория с подкатегориями (первый уровень)
+      // Set the current category
+      const categoryData = selectedItem.category || selectedItem;
+      setCategoryFilter(categoryData.name);
+      setCurrentCategory(categoryData);
+
+      // Hide the buttons after selection
+      setChats((prev) =>
+         prev.map((chat) => {
+            if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+               return {
+                  ...chat,
+                  showInitialButtons: false,
+                  buttonsWereHidden: true,
+                  // Keep only the welcome message, remove all buttons
+                  messages: [chat.messages[0]],
+               };
+            }
+            return chat;
+         })
+      );
+
+      /* 
+      // TEMPORARILY COMMENTED OUT - Subcategory handling
       if (selectedItem?.subcategories || selectedItem?.category?.subcategories) {
          const categoryData = selectedItem.category || selectedItem;
          setCategoryFilter(categoryData.name);
@@ -506,7 +531,7 @@ const ChatProvider = ({ children }) => {
          return;
       }
 
-      // Проверяем, является ли selectedItem категорией с FAQ (без подкатегорий)
+      // TEMPORARILY COMMENTED OUT - FAQ handling
       if (selectedItem?.category?.faq || (selectedItem?.faq && !selectedItem?.subcategories)) {
          const categoryData = selectedItem.category || selectedItem;
          setCategoryFilter(categoryData.name);
@@ -540,7 +565,7 @@ const ChatProvider = ({ children }) => {
          return;
       }
 
-      // Если это подкатегория (второй уровень)
+      // TEMPORARILY COMMENTED OUT - Subcategory reports handling
       if (selectedItem?.isSubcategory && selectedItem?.reports) {
          setCurrentSubcategory(selectedItem);
          setCategoryFilter(selectedItem.name);
@@ -570,7 +595,7 @@ const ChatProvider = ({ children }) => {
          return;
       }
 
-      // Если это report (третий уровень)
+      // TEMPORARILY COMMENTED OUT - Report handling
       if (selectedItem?.isReport) {
          if (currentCategory?.faq) {
             setChats((prev) =>
@@ -603,7 +628,7 @@ const ChatProvider = ({ children }) => {
          return;
       }
 
-      // Если это FAQ вопрос
+      // TEMPORARILY COMMENTED OUT - FAQ question handling
       if (selectedItem?.isFaq) {
          if (selectedItem.selectedReport) {
             createMessage(selectedItem.text, false, {
@@ -619,6 +644,7 @@ const ChatProvider = ({ children }) => {
          }
          return;
       }
+      */
    };
 
    const removeFeedbackMessage = (messageIndex) => {
