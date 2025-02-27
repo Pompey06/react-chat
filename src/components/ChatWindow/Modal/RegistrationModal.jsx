@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { BaseModal } from "./BaseModal";
 import clearIcon from "../../../assets/clearIcon.svg";
 import InputMask from "react-input-mask";
@@ -13,6 +13,12 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
    const [entityType, setEntityType] = useState("physical");
    // Состояние для открытого селекта региона (если потребуется в будущем)
    const [regionOpen, setRegionOpen] = useState(false);
+   // Состояние для списка регионов
+   const [regions, setRegions] = useState([]);
+   // Состояние для загрузки регионов
+   const [loadingRegions, setLoadingRegions] = useState(false);
+   // Состояние для ошибки загрузки регионов
+   const [regionsError, setRegionsError] = useState(null);
 
    // Используем refs для полей формы
    const surnameRef = useRef(null);
@@ -31,6 +37,34 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
    const [isSubmitting, setIsSubmitting] = useState(false);
    // errors: если значение true — добавляется класс error
    const [errors, setErrors] = useState({});
+
+   // Загрузка регионов при открытии модального окна
+   useEffect(() => {
+      if (isOpen) {
+         fetchRegions();
+      }
+   }, [isOpen]);
+
+   // Функция для загрузки регионов
+   const fetchRegions = async () => {
+      setLoadingRegions(true);
+      setRegionsError(null);
+
+      try {
+         const response = await axios.get(`${import.meta.env.VITE_API_URL}/form/get-regions`);
+         // Проверяем наличие данных в ответе
+         if (response.data && response.data.result && Array.isArray(response.data.result)) {
+            setRegions(response.data.result);
+         } else {
+            throw new Error("Неверный формат данных");
+         }
+      } catch (error) {
+         console.error("Ошибка при загрузке регионов:", error);
+         setRegionsError("Не удалось загрузить список регионов");
+      } finally {
+         setLoadingRegions(false);
+      }
+   };
 
    // При любом изменении значения очищаем ошибку для этого поля
    const handleChange = (e) => {
@@ -78,18 +112,30 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
       setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
    };
 
+   // Функция для получения значения поля или null, если оно пустое
+   const getFieldValueOrNull = (ref) => {
+      if (!ref.current) return null;
+      const value = ref.current.value.trim();
+      return value === "" ? null : value;
+   };
+
    const handleSubmit = async () => {
       const formData = new FormData();
 
       // Общие данные для обоих типов
-      formData.append("conversation_id", currentChatId || "");
+      formData.append("conversation_id", currentChatId || null);
       formData.append("last_name", surnameRef.current.value);
       formData.append("first_name", nameRef.current.value);
-      formData.append("middle_name", patronymicRef.current.value);
+
+      // Необязательные поля - отправляем null если пустые
+      const patronymic = getFieldValueOrNull(patronymicRef);
+      const description = getFieldValueOrNull(descriptionRef);
+
+      formData.append("middle_name", patronymic);
       formData.append("phone", phoneRef.current.value);
       formData.append("email", emailRef.current.value);
       formData.append("region", regionRef.current.value);
-      formData.append("description", descriptionRef.current.value);
+      formData.append("description", description);
 
       // Добавляем файлы
       selectedFiles.forEach((file) => {
@@ -99,33 +145,33 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
       // Если выбрано юридическое лицо, добавляем BIN и IIN
       if (entityType === "legal") {
          formData.append("bin_number", binRef.current.value);
-         formData.append("iin_number", iinRef.current.value);
+
+         // IIN необязательное поле - отправляем null если пустое
+         const iin = getFieldValueOrNull(iinRef);
+         formData.append("iin_number", iin);
       }
 
       // Валидация
       const newErrors = {};
       Object.entries({
-         last_name: surnameRef.current.value,
-         first_name: nameRef.current.value,
+         surname: surnameRef.current.value,
+         name: nameRef.current.value,
          phone: phoneRef.current.value,
          email: emailRef.current.value,
          region: regionRef.current.value,
-         ...(entityType === "legal" && {
-            bin_number: binRef.current.value,
-            iin_number: iinRef.current.value,
-         }),
+         ...(entityType === "legal" && { bin: binRef.current.value }), // BIN обязателен только для юридического лица
       }).forEach(([key, value]) => {
          if (!value.trim()) {
-            newErrors[key] = true;
+            newErrors[key] = true; // Пустое обязательное поле
          } else {
-            if ((key === "bin_number" || key === "iin_number") && !/^\d+$/.test(value)) {
-               newErrors[key] = true;
+            if (key === "bin" && !/^\d+$/.test(value)) {
+               newErrors[key] = true; // BIN должен содержать только цифры
             }
             if (key === "phone" && !/^[0-9+\-\s()]+$/.test(value)) {
-               newErrors[key] = true;
+               newErrors[key] = true; // Телефон: только цифры, пробелы, +, -, скобки
             }
             if (key === "email" && !/\S+@\S+\.\S+/.test(value)) {
-               newErrors[key] = true;
+               newErrors[key] = true; // Email: стандартная проверка
             }
          }
       });
@@ -187,6 +233,14 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
       onClose();
    };
 
+   // Компонент для отображения звездочки обязательного поля
+   const RequiredStar = () => <span className="text-red-500">*</span>;
+
+   // Функция для повторной загрузки регионов при ошибке
+   const handleRetryLoadRegions = () => {
+      fetchRegions();
+   };
+
    return (
       <BaseModal isOpen={isOpen} onClose={handleClose} title={title} modalClassName="registration-modal">
          <form className="registration-form" onSubmit={(e) => e.preventDefault()}>
@@ -207,6 +261,9 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
 
             {/* Общие поля формы */}
             <div className="form-group mb-2.5">
+               <label htmlFor="surname" className="block text-sm font-medium mb-1">
+                  {t("registration.surname")} <RequiredStar />
+               </label>
                <input
                   type="text"
                   id="surname"
@@ -219,6 +276,9 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
                />
             </div>
             <div className="form-group mb-2.5">
+               <label htmlFor="name" className="block text-sm font-medium mb-1">
+                  {t("registration.name")} <RequiredStar />
+               </label>
                <input
                   type="text"
                   id="name"
@@ -231,6 +291,9 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
                />
             </div>
             <div className="form-group mb-2.5">
+               <label htmlFor="patronymic" className="block text-sm font-medium mb-1">
+                  {t("registration.patronymic")}
+               </label>
                <input
                   type="text"
                   id="patronymic"
@@ -238,15 +301,25 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
                   ref={patronymicRef}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`registration-input w-full ${errors.patronymic ? "error" : ""}`}
+                  className={`registration-input w-full`}
                   placeholder={t("registration.patronymic")}
                />
             </div>
             <div className="form-group mb-2.5">
-               <InputMask mask="+7 9999 99 99 99" maskChar=" " onBlur={handleBlur} onChange={handleChange}>
+               <label htmlFor="phone" className="block text-sm font-medium mb-1">
+                  {t("registration.phone")} <RequiredStar />
+               </label>
+               <InputMask
+                  mask="+7 9999 99 99 99"
+                  maskChar=" "
+                  onBlur={(e) => handleBlur({ target: { name: "phone", value: e.target.value } })}
+                  onChange={(e) => handleChange({ target: { name: "phone", value: e.target.value } })}
+               >
                   {(inputProps) => (
                      <input
                         {...inputProps}
+                        id="phone"
+                        name="phone"
                         ref={phoneRef}
                         className={`registration-input w-full ${errors.phone ? "error" : ""}`}
                         placeholder={t("registration.phone")}
@@ -255,6 +328,9 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
                </InputMask>
             </div>
             <div className="form-group mb-2.5">
+               <label htmlFor="email" className="block text-sm font-medium mb-1">
+                  {t("registration.email")} <RequiredStar />
+               </label>
                <input
                   type="email"
                   id="email"
@@ -269,52 +345,94 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
 
             {entityType === "legal" && (
                <div className="flex gap-4 mb-2.5">
-                  <input
-                     type="text"
-                     id="bin"
-                     name="bin"
-                     ref={binRef}
-                     onInput={handleDigitInput}
-                     onChange={handleChange}
-                     onBlur={handleBlur}
-                     className={`registration-input w-1/2 ${errors.bin ? "error" : ""}`}
-                     placeholder={t("registration.bin")}
-                  />
-                  <input
-                     type="text"
-                     id="iin"
-                     name="iin"
-                     ref={iinRef}
-                     onInput={handleDigitInput}
-                     onChange={handleChange}
-                     onBlur={handleBlur}
-                     className={`registration-input w-1/2 ${errors.iin ? "error" : ""}`}
-                     placeholder={t("registration.iin")}
-                  />
+                  <div className="w-1/2">
+                     <label htmlFor="bin" className="block text-sm font-medium mb-1">
+                        {t("registration.bin")} <RequiredStar />
+                     </label>
+                     <input
+                        type="text"
+                        id="bin"
+                        name="bin"
+                        ref={binRef}
+                        onInput={handleDigitInput}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={`registration-input w-full ${errors.bin ? "error" : ""}`}
+                        placeholder={t("registration.bin")}
+                     />
+                  </div>
+                  <div className="w-1/2">
+                     <label htmlFor="iin" className="block text-sm font-medium mb-1">
+                        {t("registration.iin")}
+                     </label>
+                     <input
+                        type="text"
+                        id="iin"
+                        name="iin"
+                        ref={iinRef}
+                        onInput={handleDigitInput}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={`registration-input w-full`}
+                        placeholder={t("registration.iin")}
+                     />
+                  </div>
                </div>
             )}
 
             {/* Поле-селект "Выберите регион" с кликабельной стрелкой */}
             <div className="form-group mb-2.5">
-               <label className="form-group mb-2.5 custom-select-container">
-                  <select id="region" name="region" ref={regionRef} className="registration-input w-full custom-select">
-                     <option value="">{t("registration.region.select")}</option>
-                     <option value="1">{t("registration.region.option1")}</option>
-                     <option value="2">{t("registration.region.option2")}</option>
-                     <option value="3">{t("registration.region.option3")}</option>
-                  </select>
-                  <span className="custom-select-arrow"></span>
+               <label htmlFor="region" className="block text-sm font-medium mb-1">
+                  {t("registration.region.select")} <RequiredStar />
                </label>
+               <div className="custom-select-container">
+                  {loadingRegions ? (
+                     <div className="registration-input w-full flex items-center justify-center py-2">
+                        <span>{t("registration.loadingRegions")}</span>
+                     </div>
+                  ) : regionsError ? (
+                     <div className="registration-input w-full flex items-center justify-between py-2 text-red-500">
+                        <span>{regionsError}</span>
+                        <button
+                           type="button"
+                           onClick={handleRetryLoadRegions}
+                           className="text-blue-500 hover:text-blue-700"
+                        >
+                           {t("registration.retry")}
+                        </button>
+                     </div>
+                  ) : (
+                     <select
+                        className={`registration-input w-full ${errors.region ? "error" : ""}`}
+                        id="region"
+                        name="region"
+                        ref={regionRef}
+                        onChange={(e) => handleChange({ target: { name: "region", value: e.target.value } })}
+                        onBlur={(e) => handleBlur({ target: { name: "region", value: e.target.value } })}
+                     >
+                        <option value="">{t("registration.region.select")}</option>
+                        {regions.map((region) => (
+                           <option key={region.ID} value={region.ID}>
+                              {region.NAME}
+                           </option>
+                        ))}
+                     </select>
+                  )}
+                  {!loadingRegions && !regionsError && <span className="custom-select-arrow"></span>}
+               </div>
             </div>
 
             <div className="form-group mb-2.5">
+               <label htmlFor="description" className="block text-sm font-medium mb-1">
+                  {t("registration.description")}
+               </label>
                <textarea
                   id="description"
                   name="description"
                   ref={descriptionRef}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`registration-textarea w-full ${errors.description ? "error" : ""}`}
+                  className={`registration-textarea w-full`}
                   placeholder={t("registration.description")}
                   rows="5"
                ></textarea>

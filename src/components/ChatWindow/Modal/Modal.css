@@ -209,6 +209,13 @@ textarea:focus {
    text-align: center;
 }
 
+.registration-form label {
+   font-family: "Roboto", sans-serif;
+   font-size: 12px;
+   color: #848080;
+   line-height: 1;
+}
+
 @media (max-width: 450px) {
    .entity-selection {
       flex-direction: column;
