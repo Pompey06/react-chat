@@ -13,9 +13,9 @@
 
 .feedback-button {
    border-radius: 10px;
-   border: 1px solid #0086bf;
+   border: 1px solid #0068bf;
    background: #fff;
-   color: #0086bf;
+   color: #0068bf;
    font-size: 16px;
    padding: 10px 45px;
    position: relative;
@@ -25,9 +25,9 @@
 }
 
 .feedback-button:hover {
-   background: #0086bf;
+   background: #0068bf;
    color: #fff;
-   border-color: #0086bf;
+   border-color: #0068bf;
 }
 
 .feedback-button img {

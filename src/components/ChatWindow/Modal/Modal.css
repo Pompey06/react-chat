@@ -17,7 +17,7 @@
 
 /* Стили для модального окна */
 .modal {
-   border-left: 5px solid #0086bf; /* Синяя полоса слева вместо желтой */
+   border-left: 5px solid #0068bf; /* Синяя полоса слева вместо желтой */
    border-radius: 8px;
    background: #fff;
    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -58,7 +58,7 @@ textarea {
 
 textarea:focus {
    outline: none;
-   border-color: #0086bf; /* Синий цвет из вашей палитры */
+   border-color: #0068bf; /* Синий цвет из вашей палитры */
    box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
@@ -66,7 +66,7 @@ textarea:focus {
 .feedback__button {
    padding: 10px 24px;
    border-radius: 6px;
-   background-color: #0086bf;
+   background-color: #0068bf;
    color: white;
    font-family: Roboto, sans-serif;
    font-size: 14px;
@@ -114,7 +114,7 @@ textarea:focus {
 
 .registration-input:focus {
    outline: none;
-   border-color: #0086bf !important;
+   border-color: #0068bf !important;
    box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
@@ -136,14 +136,14 @@ textarea:focus {
 
 .registration-textarea:focus {
    outline: none;
-   border-color: #0086bf !important;
+   border-color: #0068bf !important;
    box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
 /* Стили для модалки регистрации */
 .registration-modal .modal {
    background: #fff !important;
-   border-left: 5px solid #0086bf;
+   border-left: 5px solid #0068bf;
 }
 
 /* Радио-кнопки */
@@ -151,7 +151,7 @@ textarea:focus {
    width: 18px;
    height: 18px;
    border-radius: 50%;
-   border: 1px solid #0086bf;
+   border: 1px solid #0068bf;
    background: #fff;
    position: relative;
    cursor: pointer;
@@ -159,7 +159,7 @@ textarea:focus {
 }
 
 .entity-radio.active {
-   border: 1px solid #0086bf;
+   border: 1px solid #0068bf;
 }
 
 .entity-radio.active::after {
@@ -170,13 +170,13 @@ textarea:focus {
    width: 8px;
    height: 8px;
    border-radius: 50%;
-   background: #0086bf;
+   background: #0068bf;
 }
 
 /* Кнопка выбора файла */
 .choose-file-button {
    border-radius: 6px;
-   background: #0086bf;
+   background: #0068bf;
    border: none;
    padding: 10px 20px;
    color: #fff;
