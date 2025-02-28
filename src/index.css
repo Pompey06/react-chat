@@ -28,7 +28,7 @@
    padding-top: 30px;
    padding-left: 30px;
    padding-right: 40px;
-   min-height: calc(100vh - 240px) !important;
+   min-height: calc(100vh - 150px) !important;
 }
 
 .sidebar {

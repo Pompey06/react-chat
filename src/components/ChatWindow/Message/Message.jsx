@@ -88,7 +88,11 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
       <div
          className={`message mb-8 bg-white flex font-light ${
             isUser ? "user text-right self-end text-white" : "text-left ai text-black self-start"
-         } ${isButton ? "cursor-pointer hover:bg-gray-200 transition-colors" : ""}`}
+         } ${
+            isButton
+               ? "cursor-pointer hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+               : ""
+         }`}
          onClick={isButton ? onClick : undefined}
       >
          <div>
