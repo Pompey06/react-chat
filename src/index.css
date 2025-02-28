@@ -35,24 +35,8 @@
    max-height: calc(100vh) !important;
 }
 
-/*@media (max-width: 1024px) {
-   .message-list-wrap {
-      max-height: calc(100vh - 215px) !important;
-   }
-   .message-list {
-      min-height: calc(100vh - 215px) !important;
-   }
-   .sidebar {
-      max-height: calc(100vh - 35px) !important;
-   }
-}*/
-
 @media (max-width: 700px) {
-   .message-list-wrap {
-      max-height: calc(100vh - 210px) !important;
-   }
    .message-list {
-      min-height: calc(100vh - 210px) !important;
       padding-left: 15px;
       padding-right: 15px;
    }
@@ -63,6 +47,6 @@
       max-height: 100vh !important;
    }
    .typing-container {
-      margin-bottom: 0 !important;
+      margin-bottom: 10px !important;
    }
 }
