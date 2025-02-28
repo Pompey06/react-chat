@@ -1,7 +1,15 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { hasFeedback, saveFeedbackState } from "../utils/feedbackStorage";
+import {
+   hasFeedback,
+   saveFeedbackState,
+   hasBadFeedbackPrompt,
+   saveBadFeedbackPromptState,
+   getFilePaths,
+   saveFilePath,
+   getFilePathByBotIndex,
+} from "../utils/feedbackStorage";
 
 const ChatContext = createContext();
 
@@ -69,8 +77,25 @@ const ChatProvider = ({ children }) => {
          }));
 
          const messagesWithFeedback = [];
+
+         const savedFilePaths = getFilePaths(chatId);
+
+         let botIndex = 0;
          formattedMessages.forEach((message, index) => {
+            if (!message.isUser) {
+               // Получаем filePath по индексу бота
+               const filePath = getFilePathByBotIndex(chatId, botIndex);
+               if (filePath) {
+                  message.filePath = filePath;
+               }
+               botIndex++;
+            }
+
             messagesWithFeedback.push(message);
+            // Добавляем filePath из localStorage, если он есть для сообщения от бота
+            if (!message.isUser && savedFilePaths[index]) {
+               message.filePath = savedFilePaths[index];
+            }
 
             // Добавляем фидбек только если:
             // 1. Сообщение от ассистента
@@ -84,6 +109,15 @@ const ChatProvider = ({ children }) => {
                });
             }
          });
+
+         if (hasBadFeedbackPrompt(chatId)) {
+            messagesWithFeedback.push({
+               text: t("feedback.badFeedbackPromptText"),
+               isUser: false,
+               isFeedback: false,
+               badFeedbackPrompt: true,
+            });
+         }
 
          return {
             ...response.data,
@@ -388,7 +422,7 @@ const ChatProvider = ({ children }) => {
          // Отправляем запрос с новыми параметрами
          const res = await axios.post(`${import.meta.env.VITE_API_URL}/assistant/ask`, null, { params });
 
-         // Остальной код обработки ответа остается без изменений
+         // Получаем данные из ответа
          const conversationId = res.data.conversation_id;
          const conversationTitle = res.data.conversation_title;
 
@@ -408,7 +442,16 @@ const ChatProvider = ({ children }) => {
             prev.map((chat) => {
                if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
                   const chatId = chat.id || conversationId;
-                  const newBotMessageIndex = chat.messages.length + 1;
+                  const newBotMessageIndex = chat.messages.length;
+
+                  let botCount = 0;
+                  chat.messages.forEach((msg) => {
+                     if (!msg.isUser && !msg.isFeedback) botCount++;
+                  });
+                  // Сохраняем filePath в localStorage, если он есть
+                  if (filePath) {
+                     saveFilePath(chatId, botCount, filePath);
+                  }
 
                   const messages = [
                      ...chat.messages,
@@ -724,6 +767,7 @@ const ChatProvider = ({ children }) => {
 
          // Если пользователь отправил плохой отзыв, добавляем сообщение для регистрации
          if (rate === "bad") {
+            saveBadFeedbackPromptState(currentChat.id);
             setChats((prevChats) =>
                prevChats.map((chat) => {
                   if (String(chat.id) === String(currentChatId) || (chat.id === null && currentChatId === null)) {
