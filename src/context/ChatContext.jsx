@@ -524,21 +524,50 @@ const ChatProvider = ({ children }) => {
       setCategoryFilter(categoryData.name);
       setCurrentCategory(categoryData);
 
-      // Hide the buttons after selection
-      setChats((prev) =>
-         prev.map((chat) => {
-            if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-               return {
-                  ...chat,
-                  showInitialButtons: false,
-                  buttonsWereHidden: true,
-                  // Keep only the welcome message, remove all buttons
-                  messages: [chat.messages[0]],
-               };
-            }
-            return chat;
-         })
-      );
+      // Show FAQ questions immediately after selecting a category
+      if (categoryData.faq && categoryData.faq.length > 0) {
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  const faqButtons = categoryData.faq.map((faq) => ({
+                     text:
+                        locale === "ru"
+                           ? faq.question
+                           : (translationsKz && translationsKz[faq.question]) || faq.question,
+                     isUser: true,
+                     isFeedback: false,
+                     isButton: true,
+                     isFaq: true,
+                     faqData: faq,
+                  }));
+
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     messages: [chat.messages[0], ...faqButtons],
+                  };
+               }
+               return chat;
+            })
+         );
+      } else {
+         // If no FAQ is available, just hide the buttons
+         setChats((prev) =>
+            prev.map((chat) => {
+               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+                  return {
+                     ...chat,
+                     showInitialButtons: false,
+                     buttonsWereHidden: true,
+                     // Keep only the welcome message, remove all buttons
+                     messages: [chat.messages[0]],
+                  };
+               }
+               return chat;
+            })
+         );
+      }
 
       /* 
       // TEMPORARILY COMMENTED OUT - Subcategory handling
@@ -566,40 +595,6 @@ const ChatProvider = ({ children }) => {
                      showInitialButtons: false,
                      buttonsWereHidden: true,
                      messages: [chat.messages[0], ...subcategoryButtons],
-                  };
-               }
-               return chat;
-            })
-         );
-         return;
-      }
-
-      // TEMPORARILY COMMENTED OUT - FAQ handling
-      if (selectedItem?.category?.faq || (selectedItem?.faq && !selectedItem?.subcategories)) {
-         const categoryData = selectedItem.category || selectedItem;
-         setCategoryFilter(categoryData.name);
-         setCurrentCategory(categoryData);
-
-         setChats((prev) =>
-            prev.map((chat) => {
-               if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
-                  const faqButtons = categoryData.faq.map((faq) => ({
-                     text:
-                        locale === "ru"
-                           ? faq.question
-                           : (translationsKz && translationsKz[faq.question]) || faq.question,
-                     isUser: true,
-                     isFeedback: false,
-                     isButton: true,
-                     isFaq: true,
-                     faqData: faq,
-                  }));
-
-                  return {
-                     ...chat,
-                     showInitialButtons: false,
-                     buttonsWereHidden: true,
-                     messages: [chat.messages[0], ...faqButtons],
                   };
                }
                return chat;
@@ -670,24 +665,17 @@ const ChatProvider = ({ children }) => {
          }
          return;
       }
+      */
 
-      // TEMPORARILY COMMENTED OUT - FAQ question handling
+      // Handle FAQ question selection
       if (selectedItem?.isFaq) {
-         if (selectedItem.selectedReport) {
-            createMessage(selectedItem.text, false, {
-               subcategory: currentSubcategory?.name,
-               subcategory_report: selectedItem.selectedReport,
-            });
-         } else {
-            createMessage(selectedItem.text, false, {
-               category: currentCategory?.name,
-               subcategory: null,
-               subcategory_report: null,
-            });
-         }
+         createMessage(selectedItem.text, false, {
+            category: currentCategory?.name,
+            subcategory: null,
+            subcategory_report: null,
+         });
          return;
       }
-      */
    };
 
    const removeFeedbackMessage = (messageIndex) => {

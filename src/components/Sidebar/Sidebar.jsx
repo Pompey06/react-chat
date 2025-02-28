@@ -46,9 +46,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
       >
          <div className="sidebar__top flex justify-between items-start gap-2.5">
             <img src={logo} alt="logo" className="sidebar__logo" />
-            <p className="logo__text">
-               Бюро национальной статистики Агентства по стратегическому планированию и реформам Республики Казахстан
-            </p>
+            <p className="logo__text">{t("logo.text")}</p>
             <img
                onClick={toggleSidebar}
                src={newBurgerIcon}
