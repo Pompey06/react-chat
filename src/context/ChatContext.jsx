@@ -241,7 +241,6 @@ const ChatProvider = ({ children }) => {
 
    useEffect(() => {
       if (currentChatId === null) {
-         /* Temporarily commented out subcategory and category handling
          if (currentSubcategory) {
             // Если есть выбранная подкатегория, показываем её reports
             handleButtonClick({
@@ -252,9 +251,7 @@ const ChatProvider = ({ children }) => {
          } else if (currentCategory) {
             // Если есть только категория, показываем её содержимое
             handleButtonClick(currentCategory);
-         } else 
-         */
-         if (categories.length > 0) {
+         } else if (categories.length > 0) {
             // Если ничего не выбрано, показываем начальные категории
             updateChatWithExistingCategories();
          }
@@ -784,6 +781,27 @@ const ChatProvider = ({ children }) => {
       }
    };
 
+   const addBotMessage = (text) => {
+      setChats((prev) =>
+         prev.map((chat) => {
+            if (String(chat.id) === String(currentChatId) || (chat.id === null && chat === prev[0])) {
+               return {
+                  ...chat,
+                  messages: [
+                     ...chat.messages,
+                     {
+                        text,
+                        isUser: false,
+                        isFeedback: false,
+                     },
+                  ],
+               };
+            }
+            return chat;
+         })
+      );
+   };
+
    return (
       <ChatContext.Provider
          value={{
@@ -801,6 +819,7 @@ const ChatProvider = ({ children }) => {
                chats.find((c) => String(c.id) === String(currentChatId) || (c.id === null && c === chats[0]))
                   ?.showInitialButtons || false,
             updateLocale,
+            addBotMessage,
          }}
       >
          {children}

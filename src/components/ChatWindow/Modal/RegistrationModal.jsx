@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import "./Modal.css";
 import axios from "axios";
 
-export default function RegistrationModal({ isOpen, onClose, title, onSubmit, currentChatId }) {
+export default function RegistrationModal({ isOpen, onClose, title, onSubmit, currentChatId, addBotMessage }) {
    const { t } = useTranslation();
 
    // Состояние для типа лица: 'physical' (по умолчанию) или 'legal'
@@ -197,6 +197,15 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
 
          console.log("Форма успешно отправлена:", response.data);
 
+         // Получаем ID из ответа
+         const requestId = response.data?.result?.id;
+
+         // Если ID получен, добавляем сообщение в чат от бота
+         if (requestId && addBotMessage) {
+            const successMessage = t("registration.successMessage", { requestId });
+            addBotMessage(successMessage);
+         }
+
          // Очистка формы после успешной отправки
          if (surnameRef.current) surnameRef.current.value = "";
          if (nameRef.current) nameRef.current.value = "";
@@ -209,7 +218,12 @@ export default function RegistrationModal({ isOpen, onClose, title, onSubmit, cu
          if (iinRef.current) iinRef.current.value = "";
          setSelectedFiles([]);
          setErrors({});
-         onSubmit(response.data); // Вызываем callback после успешной отправки
+
+         // Вызываем callback после успешной отправки
+         onSubmit(response.data);
+
+         // Закрываем модальное окно после успешной отправки
+         handleClose();
       } catch (error) {
          console.error("Ошибка при отправке формы:", error);
       } finally {

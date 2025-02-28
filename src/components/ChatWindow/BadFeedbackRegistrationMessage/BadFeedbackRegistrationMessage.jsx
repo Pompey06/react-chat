@@ -1,10 +1,12 @@
 // BadFeedbackRegistrationMessage.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import RegistrationModal from "../Modal/RegistrationModal";
 import { useTranslation } from "react-i18next";
 import "./BadFeedbackRegistrationMessage.css";
+import { ChatContext } from "../../../context/ChatContext";
 
 export default function BadFeedbackRegistrationMessage({ currentChatId }) {
+   const { addBotMessage } = useContext(ChatContext);
    const { t } = useTranslation();
    const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -35,6 +37,7 @@ export default function BadFeedbackRegistrationMessage({ currentChatId }) {
                onSubmit={handleSubmit}
                feedbackType="badRegistration"
                currentChatId={currentChatId}
+               addBotMessage={addBotMessage}
             />
          </div>
       </div>
