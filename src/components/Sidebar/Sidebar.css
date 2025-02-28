@@ -1,5 +1,4 @@
 .sidebar {
-   border-radius: 10px;
    transition: all 0.4s ease-in-out;
    width: 384px;
    overflow-y: auto;
@@ -62,19 +61,25 @@
    text-transform: uppercase;
 }
 
-.sidebar--close .sidebar__buttons,
-.sidebar--close .logo__text,
-.sidebar--close .sidebar__logo {
+.sidebar--close .sidebar__buttons {
    opacity: 0;
    visibility: hidden;
    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
 }
 
-.sidebar--close .sidebar__icon {
-   position: absolute;
-   left: 50%;
-   transform: translateX(-50%);
-   top: 32px;
+@media (min-width: 700px) {
+   .sidebar--close .logo__text,
+   .sidebar--close .sidebar__logo {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+   }
+   .sidebar--close .sidebar__icon {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 32px;
+   }
 }
 
 .sidebar__button_active {
@@ -94,7 +99,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: #1e3a8a;
+      background-color: #eff8fe;
       z-index: 50;
       transform: translateX(-100%);
       transition: transform 0.4s ease-in-out;
@@ -109,5 +114,9 @@
    .sidebar--close .sidebar__buttons {
       opacity: 1;
       visibility: visible;
+   }
+   .sidebar__icon {
+      width: 40px;
+      height: 40px;
    }
 }

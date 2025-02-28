@@ -35,7 +35,7 @@
    max-height: calc(100vh) !important;
 }
 
-@media (max-width: 1024px) {
+/*@media (max-width: 1024px) {
    .message-list-wrap {
       max-height: calc(100vh - 215px) !important;
    }
@@ -45,7 +45,7 @@
    .sidebar {
       max-height: calc(100vh - 35px) !important;
    }
-}
+}*/
 
 @media (max-width: 700px) {
    .message-list-wrap {
@@ -53,6 +53,8 @@
    }
    .message-list {
       min-height: calc(100vh - 210px) !important;
+      padding-left: 15px;
+      padding-right: 15px;
    }
    .wrapper {
       padding-bottom: 0;

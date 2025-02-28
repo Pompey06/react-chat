@@ -1,6 +1,7 @@
 import React from "react";
 import "./Header.css";
 import burgerBlue from "../../assets/burger-blue.svg";
+import newBurgerIcon from "../../assets/newBurgerIcon.svg";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
 import { ChatContext } from "../../context/ChatContext"; // Путь к ChatProvider
@@ -20,7 +21,7 @@ const Header = ({ isSidebarOpen, toggleSidebar }) => {
       <div className="h-[50px] justify-end header border-b-1 border-solid flex items-center px-4">
          {/* Иконка открытия боковой панели для мобильных устройств */}
          <img
-            src={burgerBlue}
+            src={isSidebarOpen ? newBurgerIcon : newBurgerIcon}
             alt="Menu"
             className={`header__burger-icon ${isSidebarOpen ? "hidden" : "block"} md:hidden`}
             onClick={toggleSidebar} // Вызываем toggleSidebar при клике
