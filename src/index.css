@@ -14,25 +14,25 @@
    background: #eee;
 }
 
-body {
-   background: #eee;
-}
-
 .wrapper {
-   padding-top: 20px;
+   width: 100vw;
+   height: 100vh;
 }
 
 .message-list-wrap {
-   max-height: calc(100vh - 240px) !important;
+   min-height: calc(100vh - 150px) !important;
+   max-height: calc(100vh - 150px) !important;
 }
 
 .message-list {
    padding-top: 30px;
+   padding-left: 30px;
+   padding-right: 40px;
    min-height: calc(100vh - 240px) !important;
 }
 
 .sidebar {
-   max-height: calc(100vh - 61px) !important;
+   max-height: calc(100vh) !important;
 }
 
 @media (max-width: 1024px) {

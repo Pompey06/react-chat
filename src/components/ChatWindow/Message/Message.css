@@ -1,18 +1,24 @@
 .message {
-   font-size: 20px;
-   border-radius: 10px;
-   color: var(--Miscellaneous-Floating-Tab---Text-Unselected, #090909);
+   font-family: Roboto;
+   font-size: 14px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: normal;
+   color: #141414;
    max-width: 672px;
 }
 
 .user {
-   border-right: 16px solid #0086bf;
-   padding: 23px 32px 23px 48px;
+   padding: 15px 22px;
+   color: #fff;
+   border-radius: 16px 16px 0px 16px;
+   background: #0068bf;
 }
 
 .ai {
-   border-left: 16px solid #f6be00;
-   padding: 23px 48px 23px 32px;
+   padding: 22px;
+   border-radius: 16px 16px 16px 0px;
+   background: #ebf0f5;
 }
 
 .file-download-container {

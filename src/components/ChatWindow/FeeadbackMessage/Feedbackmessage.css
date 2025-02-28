@@ -1,10 +1,14 @@
 .feedback-message {
-   padding: 24px 28px;
-   font-size: 20px;
-   border-radius: 10px;
-   color: var(--Miscellaneous-Floating-Tab---Text-Unselected, #090909);
+   font-family: Roboto;
+   font-size: 14px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: normal;
+   color: #141414;
    max-width: 672px;
-   border-left: 16px solid #f6be00;
+   padding: 22px;
+   border-radius: 16px 16px 16px 0px;
+   background: #ebf0f5;
 }
 
 .feedback-button {
