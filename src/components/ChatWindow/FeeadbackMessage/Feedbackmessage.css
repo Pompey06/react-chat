@@ -14,12 +14,14 @@
 .feedback-button {
    border-radius: 10px;
    border: 1px solid #0086bf;
-   background: #eee;
+   background: #fff;
    color: #0086bf;
-   font-size: 20px;
-   padding: 12px 85px;
+   font-size: 16px;
+   padding: 10px 45px;
    position: relative;
-   transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+   font-weight: 400;
+   margin: 0 8px;
 }
 
 .feedback-button:hover {
@@ -35,10 +37,12 @@
 @media (max-width: 930px) {
    .feedback-message__btns {
       flex-direction: column;
+      gap: 12px;
    }
 
    .feedback-button {
-      padding: 12px 65px;
+      padding: 10px 50px;
+      margin: 4px 0;
    }
 }
 
@@ -46,13 +50,10 @@
    .feedback-message {
       padding: 16px;
       margin-bottom: 8px;
-      font-size: 16px;
+      font-size: 14px;
    }
    .feedback-button {
-      padding: 9px 51px;
-   }
-   .feedback__button {
-      padding: 14px 71px;
-      max-width: 214px;
+      padding: 8px 40px;
+      font-size: 14px;
    }
 }

@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 .bg-blue {
-   background: #0086bf !important;
+   background: #0068bf !important;
 }
 
 .color-blue {
-   color: #0086bf;
+   color: #0068bf;
 }
 
 .bg-gray {
@@ -20,15 +20,15 @@
 }
 
 .message-list-wrap {
-   min-height: calc(100vh - 150px) !important;
-   max-height: calc(100vh - 150px) !important;
+   min-height: calc(100vh - 117px) !important;
+   max-height: calc(100vh - 117px) !important;
 }
 
 .message-list {
    padding-top: 30px;
    padding-left: 30px;
    padding-right: 40px;
-   min-height: calc(100vh - 150px) !important;
+   min-height: calc(100vh - 117px) !important;
 }
 
 .sidebar {

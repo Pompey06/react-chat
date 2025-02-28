@@ -1,33 +1,38 @@
 .typing-container {
    display: inline-flex;
    align-items: center;
-   font-size: 20px;
+   font-size: 14px;
    color: rgb(148, 148, 148);
    margin-bottom: 20px;
- }
- 
- .dot {
+}
+
+.dot {
    opacity: 0;
    animation: blink 1s infinite;
- }
- 
- .dot.one {
-   animation-delay: 0s;
- }
- .dot.two {
-   animation-delay: 0.3s;
- }
- .dot.three {
-   animation-delay: 0.6s;
- }
- 
- @keyframes blink {
-   0%, 100% { opacity: 0; }
-   50% { opacity: 1; }
- }
+}
 
- @media (max-width:700px) {
+.dot.one {
+   animation-delay: 0s;
+}
+.dot.two {
+   animation-delay: 0.3s;
+}
+.dot.three {
+   animation-delay: 0.6s;
+}
+
+@keyframes blink {
+   0%,
+   100% {
+      opacity: 0;
+   }
+   50% {
+      opacity: 1;
+   }
+}
+
+@media (max-width: 700px) {
    .typing-container {
-      font-size: 16px;
+      font-size: 12px;
    }
 }

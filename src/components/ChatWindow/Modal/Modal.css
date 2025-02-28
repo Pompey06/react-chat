@@ -1,178 +1,206 @@
-.close {
-   position: absolute;
-   top: 30px;
-   right: 30px;
-}
-
+/* Основные стили модального окна */
 .fixed {
    background: rgba(0, 0, 0, 0.5);
 }
 
+.close {
+   position: absolute;
+   top: 20px;
+   right: 20px;
+   cursor: pointer;
+   transition: opacity 0.2s ease;
+}
+
+.close:hover {
+   opacity: 0.7;
+}
+
+/* Стили для модального окна */
+.modal {
+   border-left: 5px solid #0086bf; /* Синяя полоса слева вместо желтой */
+   border-radius: 8px;
+   background: #fff;
+   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок модального окна */
+.modal h2 {
+   color: #333;
+   font-family: Roboto, sans-serif;
+   font-size: 20px;
+   font-weight: 500;
+   line-height: 1.3;
+   margin-bottom: 16px;
+}
+
+/* Текст описания */
+.modal p {
+   color: #555;
+   font-family: Roboto, sans-serif;
+   font-size: 14px;
+   font-weight: 400;
+   line-height: 1.5;
+   margin-bottom: 20px;
+}
+
 /* Textarea */
 textarea {
-   border-radius: 10px;
-   border: 1px solid #0086bf;
-   background: #eee;
+   border-radius: 8px;
+   border: 1px solid #d9d9d9;
+   background: #fff;
    resize: none;
-   font-size: 16px;
-   color: #878787;
-   padding: 16px;
+   font-size: 14px;
+   color: #555;
+   padding: 12px;
    box-sizing: border-box;
+   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 textarea:focus {
    outline: none;
-   border-color: #2563eb;
-   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+   border-color: #0086bf; /* Синий цвет из вашей палитры */
+   box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
+/* Кнопка отправки */
 .feedback__button {
-   padding: 13.5px 92px;
-   border-radius: 10px;
-   transition: background-color 0.5s ease;
+   padding: 10px 24px;
+   border-radius: 6px;
+   background-color: #0086bf;
+   color: white;
+   font-family: Roboto, sans-serif;
+   font-size: 14px;
+   font-weight: 500;
+   line-height: 1;
+   border: none;
+   cursor: pointer;
+   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .feedback__button:hover {
-   background-color: #0f5cad !important;
+   background-color: #0077aa !important;
+   transform: translateY(-1px);
 }
 
-.modal {
-   border-left: 20px solid #f6be00;
+.feedback__button:active {
+   transform: translateY(0);
 }
 
-/* Стили для инпутов и textarea в регистрации */
+.feedback__button:disabled {
+   background-color: #ccc !important;
+   cursor: not-allowed;
+   transform: none;
+}
+
+/* Стили для инпутов в регистрации */
 .registration-input {
-   border-radius: 5px;
+   border-radius: 6px;
    border: 1px solid #d9d9d9;
    background: #fff;
-   color: #848080;
+   color: #555;
    font-family: Roboto, sans-serif;
-   font-size: 16px;
-   font-weight: 300;
+   font-size: 14px;
+   font-weight: 400;
    line-height: normal;
-   padding: 12px 15px;
+   padding: 10px 12px;
    box-sizing: border-box;
+   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .registration-input::placeholder {
-   color: #848080;
-   font-family: Roboto, sans-serif;
-   font-size: 16px;
+   color: #999;
    font-weight: 300;
-   line-height: normal;
 }
 
 .registration-input:focus {
-   border: 2px solid #000 !important;
+   outline: none;
+   border-color: #0086bf !important;
+   box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
+/* Textarea для регистрации */
 .registration-textarea {
    resize: none;
-   border-radius: 5px;
+   border-radius: 6px;
    border: 1px solid #d9d9d9;
    background: #fff;
-   color: #848080;
+   color: #555;
    font-family: Roboto, sans-serif;
-   font-size: 16px;
-   font-weight: 300;
-   line-height: normal;
-   padding: 8px;
+   font-size: 14px;
+   font-weight: 400;
+   line-height: 1.5;
+   padding: 10px 12px;
    box-sizing: border-box;
-}
-
-.registration-textarea:focus {
-   border: 2px solid #000 !important;
+   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .registration-textarea:focus {
    outline: none;
-   border: 1px solid #d9d9d9;
-   box-shadow: none;
+   border-color: #0086bf !important;
+   box-shadow: 0 0 0 2px rgba(0, 134, 191, 0.2);
 }
 
 /* Стили для модалки регистрации */
 .registration-modal .modal {
-   background: #eee !important;
+   background: #fff !important;
+   border-left: 5px solid #0086bf;
 }
 
-.registration-modal-content h2 {
-   font-size: 24px;
-   font-weight: 300;
-   line-height: normal;
-   margin-bottom: 15px;
-}
-
-/* Стили для выбора типа лица */
-.entity-selection {
-   margin-bottom: 27px;
-}
-
-.entity-option {
-   display: flex;
-   align-items: center;
-}
-
+/* Радио-кнопки */
 .entity-radio {
-   width: 20px;
-   height: 20px;
-   border-radius: 160px;
+   width: 18px;
+   height: 18px;
+   border-radius: 50%;
    border: 1px solid #0086bf;
    background: #fff;
+   position: relative;
+   cursor: pointer;
+   transition: border-color 0.2s ease;
 }
 
 .entity-radio.active {
+   border: 1px solid #0086bf;
+}
+
+.entity-radio.active::after {
+   content: "";
+   position: absolute;
+   top: 4px;
+   left: 4px;
+   width: 8px;
+   height: 8px;
+   border-radius: 50%;
    background: #0086bf;
 }
 
-.entity-option span {
-   color: #000;
-   font-size: 16px;
-   font-weight: 300;
-   line-height: normal;
-}
-
-.file-upload-section {
-   margin-bottom: 16px;
-}
-
+/* Кнопка выбора файла */
 .choose-file-button {
-   border-radius: 10px;
-   background: #acacac;
+   border-radius: 6px;
+   background: #0086bf;
    border: none;
-   padding: 11px 30px;
+   padding: 10px 20px;
    color: #fff;
-   font-size: 16px;
-   font-weight: 300;
+   font-size: 14px;
+   font-weight: 500;
    line-height: 1;
    cursor: pointer;
    transition: background-color 0.3s ease;
 }
 
 .choose-file-button:hover {
-   background: #8b8b8b;
+   background: #0077aa;
 }
 
-.file-upload-info {
-   color: #848080;
-   font-size: 12px;
-   font-weight: 300;
-   line-height: normal;
-   margin-top: 5px;
-   margin-left: 27px;
-}
-
-.uploaded-files {
-   margin-top: 10px;
-}
-
-.uploaded-file {
-   margin-bottom: 5px;
-   font-size: 14px;
-   color: #555;
-}
-
+/* Состояние ошибки */
 .error {
-   border: 1px solid red !important;
+   border: 1px solid #e53e3e !important;
+   box-shadow: 0 0 0 1px rgba(229, 62, 62, 0.2);
+}
+
+select {
+   appearance: none;
+   -webkit-appearance: none;
+   -moz-appearance: none;
 }
 
 .custom-select-container {
@@ -216,23 +244,19 @@ textarea:focus {
    line-height: 1;
 }
 
+/* Адаптивность */
 @media (max-width: 450px) {
-   .entity-selection {
-      flex-direction: column;
-      gap: 15px;
-   }
-   .registration-modal .modal {
+   .modal {
       padding: 16px;
-      padding-top: 35px;
    }
-   .bad-feedback-button {
-      padding: 13px !important;
-      width: 100% !important;
+
+   .close {
+      top: 12px;
+      right: 12px;
    }
-   .registration-textarea {
-      font-size: 14px;
-   }
-   .registration-textarea::placeholder {
-      font-size: 14px;
+
+   .feedback__button {
+      padding: 10px 16px;
+      width: 100%;
    }
 }

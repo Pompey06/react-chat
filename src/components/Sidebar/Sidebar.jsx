@@ -76,7 +76,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
                      icon: <img src={newPreviousChat} alt={t("sidebar.previousRequest")} className="w-5 h-5" />,
                      onClick: () => handleSwitchChat(chat.id),
                      className: `py-2 px-4 rounded-md ${
-                        chat.id === currentChatId ? "bg-gray-300 text-black" : "bg-white text-gray-600"
+                        chat.id === currentChatId ? "bg-gray-300 text-black _active" : "bg-white text-gray-600"
                      }`,
                   })),
             ].map((button) => (

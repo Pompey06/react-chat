@@ -1,6 +1,16 @@
 .sidebar__button {
    padding: 16px 24px;
    border-radius: 12px;
+   transition: background-color 0.3s ease;
+}
+
+.sidebar__button:hover {
+   background: #f5f5f5;
+}
+
+.sidebar__button._active:hover {
+   --tw-bg-opacity: 1;
+   background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
 }
 
 .sidebar__button:first-child {

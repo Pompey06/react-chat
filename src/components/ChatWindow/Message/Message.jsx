@@ -86,7 +86,7 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
 
    return (
       <div
-         className={`message mb-8 bg-white flex font-light ${
+         className={`message mb-6 bg-white flex font-light ${
             isUser ? "user text-right self-end text-white" : "text-left ai text-black self-start"
          } ${
             isButton
