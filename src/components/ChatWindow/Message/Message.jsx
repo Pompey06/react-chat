@@ -4,8 +4,22 @@ import downloadIcon from "../../../assets/pdf.svg";
 import "./Message.css";
 import { useTranslation } from "react-i18next";
 
-export default function Message({ text, isUser, isButton, onClick, filePath }) {
+export default function Message({ text, isUser, isButton, onClick, filePath, filePaths }) {
    const { t } = useTranslation();
+
+   // Преобразуем все пути к файлам в массив
+   const allFilePaths = React.useMemo(() => {
+      if (filePaths && Array.isArray(filePaths)) {
+         return filePaths.filter((path) => typeof path === "string"); // Фильтруем только строки
+      } else if (filePath) {
+         return typeof filePath === "string"
+            ? [filePath]
+            : Array.isArray(filePath)
+            ? filePath.filter((path) => typeof path === "string")
+            : [];
+      }
+      return [];
+   }, [filePath, filePaths]);
 
    // Функция для обработки текста с переносами строк
    function renderTextWithLineBreaks(text) {
@@ -60,20 +74,28 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
    const hasLineBreaks = !isUser && text && text.includes("\n");
 
    // Функция для скачивания файла
-   const handleDownload = async (e) => {
+   const handleDownload = async (e, path) => {
       e.preventDefault();
+      if (!path || typeof path !== "string") {
+         console.error("Invalid file path:", path);
+         return;
+      }
+
       try {
-         const response = await axios.get(
-            `${import.meta.env.VITE_API_URL}/knowledge/get-file?path=${encodeURIComponent(filePath)}`,
-            null,
-            { responseType: "blob" }
-         );
+         const response = await axios({
+            method: "get",
+            url: `${import.meta.env.VITE_API_URL}/knowledge/get-file`,
+            params: { path: path },
+            responseType: "blob",
+         });
+
          // Создаем URL для blob-данных
          const url = window.URL.createObjectURL(new Blob([response.data]));
          const link = document.createElement("a");
          link.href = url;
          // Извлекаем имя файла из пути
-         link.setAttribute("download", filePath.split("/").pop());
+         const fileName = path.split("/").pop() || "file";
+         link.setAttribute("download", fileName);
          document.body.appendChild(link);
          link.click();
          link.remove();
@@ -82,7 +104,16 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
       }
    };
 
-   const fileName = filePath ? filePath.split("/").pop() : "";
+   // Функция для получения имени файла из пути
+   const getFileName = (path) => {
+      if (!path || typeof path !== "string") return "file";
+      try {
+         return path.split("/").pop() || "file";
+      } catch (error) {
+         console.error("Error getting file name:", error);
+         return "file";
+      }
+   };
 
    return (
       <div
@@ -97,14 +128,22 @@ export default function Message({ text, isUser, isButton, onClick, filePath }) {
       >
          <div>
             {hasLineBreaks ? renderTextWithLineBreaks(text) : linkifyText(text)}
-            {filePath && (
-               <div className="mt-2 flex items-center">
+            {allFilePaths.length > 0 && (
+               <div className="mt-2">
                   <div className="sources-label">{t("chat.sources")}</div>
                   <div className="file-download-container">
-                     <a href="#" onClick={handleDownload} className="file-download-link">
-                        <img src={downloadIcon} alt="Download file" className="file-icon" />
-                        <span className="file-name">{fileName}</span>
-                     </a>
+                     {allFilePaths.map((path, index) => {
+                        if (!path || typeof path !== "string") return null;
+                        const fileName = getFileName(path);
+                        return (
+                           <div key={index} className="file-item">
+                              <a href="#" onClick={(e) => handleDownload(e, path)} className="file-download-link">
+                                 <img src={downloadIcon} alt="Download file" className="file-icon" />
+                                 <span className="file-name">{fileName}</span>
+                              </a>
+                           </div>
+                        );
+                     })}
                   </div>
                </div>
             )}

@@ -23,7 +23,9 @@
 
 .file-download-container {
    display: flex;
-   align-items: center;
+   flex-direction: column; /* Изменяем на колонку для вертикального списка файлов */
+   gap: 8px; /* Добавляем отступ между файлами */
+   margin-top: 8px; /* Увеличиваем отступ сверху */
 }
 
 .file-download-link {

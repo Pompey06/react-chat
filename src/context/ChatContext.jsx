@@ -79,23 +79,35 @@ const ChatProvider = ({ children }) => {
          const messagesWithFeedback = [];
 
          const savedFilePaths = getFilePaths(chatId);
+         console.log("Saved file paths for chat", chatId, ":", savedFilePaths);
 
          let botIndex = 0;
          formattedMessages.forEach((message, index) => {
             if (!message.isUser) {
-               // Получаем filePath по индексу бота
-               const filePath = getFilePathByBotIndex(chatId, botIndex);
-               if (filePath) {
-                  message.filePath = filePath;
+               // Получаем filePaths по индексу бота
+               const paths = getFilePathByBotIndex(chatId, botIndex);
+               console.log(`Bot message ${botIndex}, paths:`, paths);
+
+               if (paths && paths.length > 0) {
+                  message.filePaths = paths;
                }
+
+               // Также проверяем сохраненные пути по индексу сообщения
+               if (savedFilePaths[index] && savedFilePaths[index].length > 0) {
+                  // Если уже есть filePaths, объединяем массивы без дубликатов
+                  const existingPaths = message.filePaths || [];
+                  const newPaths = Array.isArray(savedFilePaths[index])
+                     ? savedFilePaths[index]
+                     : [savedFilePaths[index]];
+
+                  // Объединяем массивы и удаляем дубликаты
+                  message.filePaths = [...new Set([...existingPaths, ...newPaths])];
+               }
+
                botIndex++;
             }
 
             messagesWithFeedback.push(message);
-            // Добавляем filePath из localStorage, если он есть для сообщения от бота
-            if (!message.isUser && savedFilePaths[index]) {
-               message.filePath = savedFilePaths[index];
-            }
 
             // Добавляем фидбек только если:
             // 1. Сообщение от ассистента
@@ -427,11 +439,7 @@ const ChatProvider = ({ children }) => {
             setCurrentChatId(conversationId);
          }
 
-         const filePath =
-            res.data.match_items?.find((item) => {
-               const path = item.data?.path;
-               return path && path.toLowerCase().endsWith(".pdf");
-            })?.data?.path || null;
+         const filePaths = res.data.paths || [];
 
          const formattedResponse = formatBotResponse(res.data.content);
 
@@ -446,8 +454,10 @@ const ChatProvider = ({ children }) => {
                      if (!msg.isUser && !msg.isFeedback) botCount++;
                   });
                   // Сохраняем filePath в localStorage, если он есть
-                  if (filePath) {
-                     saveFilePath(chatId, botCount, filePath);
+                  if (filePaths.length > 0) {
+                     filePaths.forEach((path, index) => {
+                        saveFilePath(chatId, botCount, path);
+                     });
                   }
 
                   const messages = [
@@ -456,7 +466,7 @@ const ChatProvider = ({ children }) => {
                         text: formattedResponse.text,
                         isUser: false,
                         isFeedback: false,
-                        filePath,
+                        filePaths: filePaths,
                         hasLineBreaks: formattedResponse.hasLineBreaks,
                      },
                   ];
