@@ -37,36 +37,65 @@ export default function Message({ text, isUser, isButton, onClick, filePath, fil
    function linkifyText(text) {
       if (!text) return null;
 
-      // Регулярное выражение, которое находит URL и отделяет завершающие символы (если они есть)
-      const urlRegex = /(https?:\/\/[^\s]+?)([),.?!]+)?(\s|$)/g;
+      // Комбинированное регулярное выражение для поиска как Markdown-ссылок, так и обычных URL
+      const combinedRegex = /(\[([^\]]+)\]\(([^)]+)\))|(https?:\/\/[^\s]+?)([),.?!]+)?(\s|$)/g;
+
       const elements = [];
       let lastIndex = 0;
       let match;
-      while ((match = urlRegex.exec(text)) !== null) {
-         // Добавляем текст до URL
+
+      while ((match = combinedRegex.exec(text)) !== null) {
+         // Добавляем текст до совпадения
          if (match.index > lastIndex) {
             elements.push(text.substring(lastIndex, match.index));
          }
-         // match[1] — URL без завершающих символов
-         // match[2] — завершающие символы (если есть)
-         // match[3] — пробельный разделитель или конец строки
-         const url = match[1];
-         const trailing = match[2] || "";
-         // Формируем ссылку
-         elements.push(
-            <a key={match.index} href={url} target="_blank" rel="noopener noreferrer" className="message-link">
-               {url}
-            </a>
-         );
-         // Добавляем завершающие символы и разделитель как текст
-         elements.push(trailing);
-         elements.push(match[3]);
-         lastIndex = urlRegex.lastIndex;
+
+         // Проверяем, какой тип совпадения мы нашли
+         if (match[1]) {
+            // Это Markdown-ссылка [текст](url)
+            const linkText = match[2];
+            const url = match[3];
+
+            elements.push(
+               <a
+                  key={`md-${match.index}`}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="message-link"
+               >
+                  {linkText}
+               </a>
+            );
+         } else {
+            // Это обычный URL
+            const url = match[4];
+            const trailing = match[5] || "";
+            const space = match[6] || "";
+
+            elements.push(
+               <a
+                  key={`url-${match.index}`}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="message-link"
+               >
+                  {url}
+               </a>
+            );
+
+            elements.push(trailing + space);
+         }
+
+         lastIndex = combinedRegex.lastIndex;
       }
-      // Если осталось что-то после последнего совпадения, добавляем это
+
+      // Если осталось что-то после последнего совпадения
       if (lastIndex < text.length) {
          elements.push(text.substring(lastIndex));
       }
+
       return elements;
    }
 
